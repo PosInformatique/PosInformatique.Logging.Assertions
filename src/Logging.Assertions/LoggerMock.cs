@@ -159,8 +159,7 @@ namespace PosInformatique.Logging.Assertions
                 this.mock = mock;
             }
 
-            public IDisposable? BeginScope<TState>(TState state)
-                where TState : notnull
+            public IDisposable BeginScope<TState>(TState state)
             {
                 var expectedLog = this.GetCurrentExpectedLogAction<ExpectedLogBeginScope>("BeginScope()");
 
