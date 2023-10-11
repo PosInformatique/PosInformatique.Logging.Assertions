@@ -22,6 +22,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A62DA28F
 		tests\.editorconfig = tests\.editorconfig
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{7B54C795-CB70-4A3D-846F-90A6732121B8}"
+	ProjectSection(SolutionItems) = preProject
+		build\azure-pipelines-ci.yaml = build\azure-pipelines-ci.yaml
+		build\azure-pipelines-release.yaml = build\azure-pipelines-release.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +48,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A62DA28F-4ECA-428B-B015-98C716DA7DAF} = {6CE746AC-E3B0-4912-89BA-23EA2733830A}
+		{7B54C795-CB70-4A3D-846F-90A6732121B8} = {6CE746AC-E3B0-4912-89BA-23EA2733830A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B3A52E02-62EF-499F-A509-8DF050E26B77}
