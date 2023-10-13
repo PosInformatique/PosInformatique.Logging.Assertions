@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="ILoggerMockSetupSequenceError.cs" company="P.O.S Informatique">
+// <copyright file="LoggerMockSetupSequenceErrorExtensions.cs" company="P.O.S Informatique">
 //     Copyright (c) P.O.S Informatique. All rights reserved.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -10,16 +10,19 @@ namespace PosInformatique.Logging.Assertions
     using Microsoft.Extensions.Logging;
 
     /// <summary>
-    /// Allows to setup the sequence of <see cref="ILogger"/> method calls for the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/>
-    /// with the <see cref="LogLevel.Error"/> log level when an <see cref="Exception"/> is occured.
+    /// Extensions method of the <see cref="ILoggerMockSetupSequenceError"/> interface to setup the <see cref="LogLevel.Error"/> log level.
     /// </summary>
-    public interface ILoggerMockSetupSequenceError : ILoggerMockSetupSequence
+    public static class LoggerMockSetupSequenceErrorExtensions
     {
         /// <summary>
         /// Allows to check the <see cref="Exception"/> passed in the argument of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/>.
         /// </summary>
-        /// <param name="exception">Delegate which allows to analyze the content of the <see cref="Exception"/>.</param>
+        /// <param name="sequence"><see cref="ILoggerMockSetupSequence"/> to setup the sequence.</param>
+        /// <param name="expectedException"><see cref="Exception"/> instance expected.</param>
         /// <returns>An instance of <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the method calls.</returns>
-        ILoggerMockSetupSequence WithException(Action<Exception> exception);
+        public static ILoggerMockSetupSequence WithException(this ILoggerMockSetupSequenceError sequence, Exception expectedException)
+        {
+            return sequence.WithException(actualException => actualException.Should().BeSameAs(expectedException));
+        }
     }
 }

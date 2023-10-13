@@ -229,11 +229,17 @@ try to make the assert fail messages the most easy to understand for the develop
 ![Assertion Missing Logs](https://raw.githubusercontent.com/PosInformatique/PosInformatique.Logging.Assertions/main/docs/AssertionMissingLogs.png)
 
 ## Library dependencies
-The [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library
-is depend of the [FluentAssertions](https://github.com/fluentassertions/fluentassertions) library
-for internal assertions which is more pretty to read in the exceptions message.
+- The [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) target the .NET Standard 2.0
+and the version 2.0.0 of the [Microsoft.Extensions.Logging.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions) NuGet package. So this library can be used with
+different .NET architecture projects (.NET Framework, .NET Core, Xamarin,...) and also with old versions of the
+[Microsoft.Extensions.Logging.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions) NuGet package.
 
-Also, the [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library
+- The [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library
+depends of the [FluentAssertions](https://github.com/fluentassertions/fluentassertions) library
+for internal assertions which is more pretty to read in the exceptions message. It is use the version 5.0.0 and of course it is compatible
+with the earlier version of it.
+
+- Also, the [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library
 use the internal [FluentAssertions](https://github.com/fluentassertions/fluentassertions) unit test
 provider engine detection to throw an exception (when an assertion is false) depending of the engine used to execute
 the unit test. For example, `XunitException` if the unit test engine used is `Xunit`.

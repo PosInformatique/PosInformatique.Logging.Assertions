@@ -37,47 +37,11 @@ namespace PosInformatique.Logging.Assertions
 
         /// <summary>
         /// Expect the call to the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> method
-        /// with a <see cref="LogLevel.Debug"/> log level.
-        /// </summary>
-        /// <param name="message">Message of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
-        /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
-        ILoggerMockSetupSequence LogDebug(string message)
-            => this.Log(LogLevel.Debug, message);
-
-        /// <summary>
-        /// Expect the call to the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> method
         /// with a <see cref="LogLevel.Error"/> log level.
         /// </summary>
         /// <param name="message">Message of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
         /// <returns>The current <see cref="ILoggerMockSetupSequenceError"/> which allows to continue the setup of the <see cref="ILogger"/> method calls
         /// and analyze also the <see cref="Exception"/> instance related to the log error message.</returns>
         ILoggerMockSetupSequenceError LogError(string message);
-
-        /// <summary>
-        /// Expect the call to the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> method
-        /// with a <see cref="LogLevel.Information"/> log level.
-        /// </summary>
-        /// <param name="message">Message of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
-        /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
-        ILoggerMockSetupSequence LogInformation(string message)
-            => this.Log(LogLevel.Information, message);
-
-        /// <summary>
-        /// Expect the call to the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> method
-        /// with a <see cref="LogLevel.Trace"/> log level.
-        /// </summary>
-        /// <param name="message">Message of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
-        /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
-        ILoggerMockSetupSequence LogTrace(string message)
-            => this.Log(LogLevel.Trace, message);
-
-        /// <summary>
-        /// Expect the call to the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> method
-        /// with a <see cref="LogLevel.Warning"/> log level.
-        /// </summary>
-        /// <param name="message">Message of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
-        /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
-        ILoggerMockSetupSequence LogWarning(string message)
-            => this.Log(LogLevel.Warning, message);
     }
 }
