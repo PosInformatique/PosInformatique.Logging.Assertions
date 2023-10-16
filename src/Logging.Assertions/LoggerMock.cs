@@ -282,7 +282,7 @@ namespace PosInformatique.Logging.Assertions
 
         private sealed class ExpectedLogBeginScope : ExpectedLogAction
         {
-            private object expectedState;
+            private readonly object expectedState;
 
             public ExpectedLogBeginScope(LoggerMockSetupSequence sequence, object state)
                 : base(sequence)
