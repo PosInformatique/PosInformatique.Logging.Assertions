@@ -33,7 +33,7 @@ namespace PosInformatique.Logging.Assertions
         /// <param name="logLevel"><see cref="LogLevel"/> of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
         /// <param name="message">Message of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
         /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
-        ILoggerMockSetupSequence Log(LogLevel logLevel, string message);
+        ILoggerMockSetupSequenceLog Log(LogLevel logLevel, string message);
 
         /// <summary>
         /// Expect the call to the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> method

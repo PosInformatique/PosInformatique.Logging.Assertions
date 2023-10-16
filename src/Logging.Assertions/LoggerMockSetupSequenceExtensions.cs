@@ -6,6 +6,7 @@
 
 namespace PosInformatique.Logging.Assertions
 {
+    using FluentAssertions;
     using Microsoft.Extensions.Logging;
 
     /// <summary>
@@ -20,7 +21,7 @@ namespace PosInformatique.Logging.Assertions
         /// <param name="sequence"><see cref="ILoggerMockSetupSequence"/> to setup the sequence.</param>
         /// <param name="message">Message of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
         /// <returns>The current <paramref name="sequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
-        public static ILoggerMockSetupSequence LogDebug(this ILoggerMockSetupSequence sequence, string message)
+        public static ILoggerMockSetupSequenceLog LogDebug(this ILoggerMockSetupSequence sequence, string message)
         {
             return sequence.Log(LogLevel.Debug, message);
         }
@@ -32,7 +33,7 @@ namespace PosInformatique.Logging.Assertions
         /// <param name="sequence"><see cref="ILoggerMockSetupSequence"/> to setup the sequence.</param>
         /// <param name="message">Message of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
         /// <returns>The current <paramref name="sequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
-        public static ILoggerMockSetupSequence LogInformation(this ILoggerMockSetupSequence sequence, string message)
+        public static ILoggerMockSetupSequenceLog LogInformation(this ILoggerMockSetupSequence sequence, string message)
         {
             return sequence.Log(LogLevel.Information, message);
         }
@@ -44,7 +45,7 @@ namespace PosInformatique.Logging.Assertions
         /// <param name="sequence"><see cref="ILoggerMockSetupSequence"/> to setup the sequence.</param>
         /// <param name="message">Message of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
         /// <returns>The current <paramref name="sequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
-        public static ILoggerMockSetupSequence LogTrace(this ILoggerMockSetupSequence sequence, string message)
+        public static ILoggerMockSetupSequenceLog LogTrace(this ILoggerMockSetupSequence sequence, string message)
         {
             return sequence.Log(LogLevel.Trace, message);
         }
@@ -56,9 +57,37 @@ namespace PosInformatique.Logging.Assertions
         /// <param name="sequence"><see cref="ILoggerMockSetupSequence"/> to setup the sequence.</param>
         /// <param name="message">Message of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
         /// <returns>The current <paramref name="sequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
-        public static ILoggerMockSetupSequence LogWarning(this ILoggerMockSetupSequence sequence, string message)
+        public static ILoggerMockSetupSequenceLog LogWarning(this ILoggerMockSetupSequence sequence, string message)
         {
             return sequence.Log(LogLevel.Warning, message);
+        }
+
+        /// <summary>
+        /// Allows to check the <see cref="Exception"/> passed in the argument of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/>.
+        /// </summary>
+        /// <param name="sequence"><see cref="ILoggerMockSetupSequence"/> to setup the sequence.</param>
+        /// <param name="expectedException"><see cref="Exception"/> instance expected.</param>
+        /// <returns>An instance of <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the method calls.</returns>
+        public static ILoggerMockSetupSequence WithException(this ILoggerMockSetupSequenceError sequence, Exception expectedException)
+        {
+            return sequence.WithException(actualException => actualException.Should().BeSameAs(expectedException));
+        }
+
+        /// <summary>
+        /// Allows to assert the template message arguments using a list of parameters.
+        /// </summary>
+        /// <param name="sequence"><see cref="ILoggerMockSetupSequence"/> to setup the sequence.</param>
+        /// <param name="expectedArguments">List of the expected arguments in the template message. The arguments have to be specified in the right expected order.</param>
+        /// <returns>An instance of <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the method calls for the <see cref="ILogger"/>.</returns>
+        public static ILoggerMockSetupSequence WithArguments(this ILoggerMockSetupSequenceLog sequence, params object[] expectedArguments)
+        {
+            return sequence.WithArguments(expectedArguments.Length, actualArguments =>
+            {
+                for (int i = 0; i < expectedArguments.Length; i++)
+                {
+                    actualArguments[i].Should().Be(expectedArguments[i]);
+                }
+            });
         }
     }
 }

@@ -24,6 +24,12 @@
     </PackageReleaseNotes>
     <PackageTags>logger log fluent unittest assert assertions logging mock</PackageTags>
   </PropertyGroup>
+	
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+        <_Parameter1>PosInformatique.Logging.Assertions.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Icon.jpg" />

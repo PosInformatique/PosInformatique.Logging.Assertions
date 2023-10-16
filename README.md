@@ -32,7 +32,7 @@ public class CustomerManager
 
     public async Task SendEmailAsync(int id, string name)
     {
-        this.logger.LogInformation($"Starting to send an email to the customer '{name}'");
+        this.logger.LogInformation($"Starting to send an email to the customer '{Name}' with the identifier '{Id}'", name, id);
 
         using (this.logger.BeginScope(new { Id = id }))
         {
@@ -81,7 +81,7 @@ public async Task SendEmailAsync()
         .Returns(Task.CompletedTask);
 
     var logger = new Mock<ILogger<CustomerManager>>(MockBehavior.Strict);
-    logger.Setup(l => l.Log(LogLevel.Information, "Starting to send an email to the customer 'Gilles TOURREAU'", ..., ..., ... )) // WTF???
+    logger.Setup(l => l.Log(LogLevel.Information, "Starting to send an email to the customer '{Name}' with the identifier '{Id}'", ..., ..., ... )) // WTF???
         ...
     logger.Setup(l => l.BeginScope<...>(...))   // WTF???
 
@@ -106,7 +106,7 @@ void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? ex
 ```
 
 And also to check the scope usage with the [ILogger](https://learn.microsoft.com/fr-fr/dotnet/api/microsoft.extensions.logging.ilogger)
-interface it can be hard !
+interface it can be hard!
 
 The [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library
 allows the developpers to mock the [ILogger](https://learn.microsoft.com/fr-fr/dotnet/api/microsoft.extensions.logging.ilogger)
@@ -124,7 +124,8 @@ public async Task SendEmailAsync()
 
     var logger = new LoggerMock<CustomerManager>();
     logger.SetupSequence()
-        .LogInformation("Starting to send an email to the customer 'Gilles TOURREAU'")
+        .LogInformation("Starting to send an email to the customer '{Name}' with the identifier '{Id}'")
+            .WithArguments("Gilles TOURREAU", 1234)
         .BeginScope(new { Id = 1234 })
             .LogDebug("Call the SendAsync() method")
             .LogDebug("SendAsync() method has been called.")
@@ -155,7 +156,8 @@ For example to check nested log scopes write the following code with the followi
 ```csharp
 var logger = new LoggerMock<CustomerManager>();
 logger.SetupSequence()
-    .LogInformation("Starting to send an email to the customer 'Gilles TOURREAU'")
+    .LogInformation("Starting to send an email to the customer '{Name}' with the identifier '{Id}'")
+        .WithArguments("Gilles TOURREAU", 1234)
     .BeginScope(new { Id = 1234 })
         .BeginScope(new { Name = "Gilles" })
             .LogError("Error in the scope 1234 + Gilles")
@@ -184,7 +186,8 @@ public async Task SendEmailAsync_WithException()
 
     var logger = new LoggerMock<CustomerManager>();
     logger.SetupSequence()
-        .LogInformation("Starting to send an email to the customer 'Gilles TOURREAU'")
+        .LogInformation("Starting to send an email to the customer '{Name}' with the identifier '{Id}'")
+            .WithArguments("Gilles TOURREAU", 1234)
         .BeginScope(new { Id = 1234 })
             .LogDebug("Call the SendAsync() method")
             .LogError("Unable to send the email !")
@@ -209,7 +212,8 @@ during the *Arrange* phase), use the version with a delegate to check the conten
 ```csharp
 var logger = new LoggerMock<CustomerManager>();
 logger.SetupSequence()
-    .LogInformation("Starting to send an email to the customer 'Gilles TOURREAU'")
+    .LogInformation("Starting to send an email to the customer '{Name}' with the identifier '{Id}'")
+        .WithArguments("Gilles TOURREAU", 1234)
     .BeginScope(new { Id = 1234 })
         .LogDebug("Call the SendAsync() method")
         .LogError("Unable to send the email !")
@@ -219,6 +223,70 @@ logger.SetupSequence()
                 e.InnerException.Should().BeNull();
             })
     .EndScope();
+```
+
+### Test log message templates
+The power of this library is the ability to assert the
+[log message templates](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/logging/#log-message-template)
+including the arguments. (*You know the kind of log messages
+which contains the vital identifiers to search in emergency in production environment and are often bad logged by the developpers...*
+:laughing: :laughing:).
+
+To assert the log message templates parameters use the `WithArguments()` method which is available with 2 overloads:
+- `WithArguments(params object[] expectedArguments)`: Allows to specify the expected arguments of the log message template.
+- `WithArguments(int expectedCount, Action<LogMessageTemplateArguments> expectedArguments)`: Allows to specify
+an delegate to assert complex arguments.
+
+For example, to assert the following log message:
+```csharp
+this.logger.LogInformation($"Starting to send an email to the customer '{Name}' with the identifier '{Id}'", name, id);
+```
+
+Using the first way with the `WithArguments(params object[] expectedArguments)` method:
+
+```csharp
+var logger = new LoggerMock<CustomerManager>();
+logger.SetupSequence()
+    .LogInformation("Starting to send an email to the customer '{Name}' with the identifier '{Id}'")
+        .WithArguments("Gilles TOURREAU", 1234)
+
+    ... // Continue the setup expected log sequence
+```
+
+Using the second way with the `WithArguments(int expectedCount, Action<LogMessageTemplateArguments> expectedArguments)` method
+which give you more control of the assertions:
+
+```csharp
+var logger = new LoggerMock<CustomerManager>();
+logger.SetupSequence()
+    .LogInformation("Starting to send an email to the customer '{Name}' with the identifier '{Id}'")
+        .WithArguments(2, args =>
+        {
+            args["Name"].Should().Be("Gilles TOURREAU");
+            args["Id"].Should().Be(1234);
+        })
+
+    ... // Continue the setup expected log sequence
+```
+
+> Here we use the FluentAssertions library to check the arguments values of the log message template, but of course you can use your
+favorite assertion framework to check it.
+
+The second way allows also to check the arguments of the log template message by there index (*it is not what I recommand,
+because if the trainee developper in your team change the name of the arguments name in the log message template, you will not
+see the impacts in your unit tests execution...*):
+
+```csharp
+var logger = new LoggerMock<CustomerManager>();
+logger.SetupSequence()
+    .LogInformation("Starting to send an email to the customer '{Name}' with the identifier '{Id}'")
+        .WithArguments(2, args =>
+        {
+            args[0].Should().Be("Gilles TOURREAU");
+            args[1].Should().Be(1234);
+        })
+
+    ... // Continue the setup expected log sequence
 ```
 
 ### Assertion fail messages

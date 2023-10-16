@@ -13,7 +13,7 @@ namespace PosInformatique.Logging.Assertions
     /// Allows to setup the sequence of <see cref="ILogger"/> method calls for the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/>
     /// with the <see cref="LogLevel.Error"/> log level when an <see cref="Exception"/> is occured.
     /// </summary>
-    public interface ILoggerMockSetupSequenceError : ILoggerMockSetupSequence
+    public interface ILoggerMockSetupSequenceError : ILoggerMockSetupSequenceLog
     {
         /// <summary>
         /// Allows to check the <see cref="Exception"/> passed in the argument of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/>.
