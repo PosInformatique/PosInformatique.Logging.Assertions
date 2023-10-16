@@ -252,6 +252,80 @@ namespace PosInformatique.Logging.Assertions.Tests
         }
 
         [Fact]
+        public void LogWithMessageTemplate_DelegateAssertion()
+        {
+            var logger = new LoggerMock<ObjectToLog>();
+            logger.SetupSequence()
+                .LogInformation("Log information with parameters {Id}, {Name} and {Object}")
+                    .WithArguments(3, args =>
+                    {
+                        args["Id"].Should().Be(1234);
+                        args["Name"].Should().Be("The name");
+                        args["Object"].Should().BeEquivalentTo(new { Property = "I am object" });
+                    })
+                .LogError("Log error after message template");
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.InvokeWithMessageTemplate();
+
+            logger.VerifyLogs();
+        }
+
+        [Fact]
+        public void LogWithMessageTemplate_DelegateAssertion_WrongExpectedArgumentCount()
+        {
+            var logger = new LoggerMock<ObjectToLog>();
+            logger.SetupSequence()
+                .LogInformation("Log information with parameters {Id}, {Name} and {Object}")
+                    .WithArguments(100, args =>
+                    {
+                        args["Id"].Should().Be(1234);
+                        args["Name"].Should().Be("The name");
+                        args["Object"].Should().BeEquivalentTo(new { Property = "I am object" });
+                    })
+                .LogError("Log error after message template");
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
+                .Should().ThrowExactly<XunitException>()
+                .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '100', Actual: '4')");
+        }
+
+        [Fact]
+        public void LogWithMessageTemplate_ParametersAssertion()
+        {
+            var logger = new LoggerMock<ObjectToLog>();
+            logger.SetupSequence()
+                .LogInformation("Log information with parameters {Id}, {Name} and {Object}")
+                    .WithArguments(1234, "The name", new { Property = "I am object" })
+                .LogError("Log error after message template");
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.InvokeWithMessageTemplate();
+
+            logger.VerifyLogs();
+        }
+
+        [Fact]
+        public void LogWithMessageTemplate_ParametersAssertion_WrongExpectedArgumentCount()
+        {
+            var logger = new LoggerMock<ObjectToLog>();
+            logger.SetupSequence()
+                .LogInformation("Log information with parameters {Id}, {Name} and {Object}")
+                    .WithArguments(1, 2, 3, 4, 5, 6, 7, "The name", new { Property = "I am object" })
+                .LogError("Log error after message template");
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
+                .Should().ThrowExactly<XunitException>()
+                .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '9', Actual: '4')");
+        }
+
+        [Fact]
         public void LoggerCalledToManyTimes()
         {
             var logger = new LoggerMock<ObjectToLog>();
@@ -444,6 +518,12 @@ namespace PosInformatique.Logging.Assertions.Tests
                 }
 
                 this.logger.LogError("Log Error {0}", 5);
+            }
+
+            public void InvokeWithMessageTemplate()
+            {
+                this.logger.LogInformation("Log information with parameters {Id}, {Name} and {Object}", 1234, "The name", new { Property = "I am object" });
+                this.logger.LogError("Log error after message template");
             }
         }
     }

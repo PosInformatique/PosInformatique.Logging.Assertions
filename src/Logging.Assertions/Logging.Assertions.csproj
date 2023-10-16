@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -10,6 +10,9 @@
     <PackageProjectUrl>https://github.com/PosInformatique/PosInformatique.Logging.Assertions</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>
+	  1.1.0
+      - Add the support to assert the log message template and the parameters.
+	  
 	  1.0.3
       - Use FluentAssertions 6.0.0 library.
 	  
@@ -24,6 +27,12 @@
     </PackageReleaseNotes>
     <PackageTags>logger log fluent unittest assert assertions logging mock</PackageTags>
   </PropertyGroup>
+	
+  <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+        <_Parameter1>PosInformatique.Logging.Assertions.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="Icon.jpg" />

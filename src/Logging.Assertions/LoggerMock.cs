@@ -80,73 +80,38 @@ namespace PosInformatique.Logging.Assertions
 
             public ILoggerMockSetupSequence BeginScope(object state)
             {
-                this.mock.expectedLogActions.Add(new ExpectedLogBeginScope(state));
+                var logBeginScope = new ExpectedLogBeginScope(this, state);
 
-                return this;
+                this.mock.expectedLogActions.Add(logBeginScope);
+
+                return logBeginScope;
             }
 
             public ILoggerMockSetupSequence EndScope()
             {
-                this.mock.expectedLogActions.Add(new ExpectedLogEndScope());
+                var logEndScope = new ExpectedLogEndScope(this);
 
-                return this;
+                this.mock.expectedLogActions.Add(logEndScope);
+
+                return logEndScope;
             }
 
-            public ILoggerMockSetupSequence Log(LogLevel logLevel, string message)
+            public ILoggerMockSetupSequenceLog Log(LogLevel logLevel, string message)
             {
-                this.mock.expectedLogActions.Add(new ExpectedLogMessage(logLevel, message));
+                var logMessage = new ExpectedLogMessage(this, logLevel, message);
 
-                return this;
+                this.mock.expectedLogActions.Add(logMessage);
+
+                return logMessage;
             }
 
             public ILoggerMockSetupSequenceError LogError(string message)
             {
-                var logMessage = new ExpectedLogMessage(LogLevel.Error, message);
+                var logMessage = new ExpectedLogMessage(this, LogLevel.Error, message);
 
                 this.mock.expectedLogActions.Add(logMessage);
 
-                return new LoggerMockSetupSequenceError(this, logMessage);
-            }
-
-            private class LoggerMockSetupSequenceError : ILoggerMockSetupSequenceError
-            {
-                private readonly ILoggerMockSetupSequence sequence;
-
-                private readonly ExpectedLogMessage logMessage;
-
-                public LoggerMockSetupSequenceError(ILoggerMockSetupSequence sequence, ExpectedLogMessage logMessage)
-                {
-                    this.sequence = sequence;
-                    this.logMessage = logMessage;
-                }
-
-                public ILoggerMockSetupSequence BeginScope(object state)
-                {
-                    return this.sequence.BeginScope(state);
-                }
-
-                [ExcludeFromCodeCoverage]
-                public ILoggerMockSetupSequence EndScope()
-                {
-                    return this.sequence.EndScope();
-                }
-
-                public ILoggerMockSetupSequence Log(LogLevel logLevel, string message)
-                {
-                    return this.sequence.Log(logLevel, message);
-                }
-
-                public ILoggerMockSetupSequenceError LogError(string message)
-                {
-                    return this.sequence.LogError(message);
-                }
-
-                public ILoggerMockSetupSequence WithException(Action<Exception> exception)
-                {
-                    this.logMessage.Exception = exception;
-
-                    return this;
-                }
+                return logMessage;
             }
         }
 
@@ -163,7 +128,7 @@ namespace PosInformatique.Logging.Assertions
             {
                 var expectedLog = this.GetCurrentExpectedLogAction<ExpectedLogBeginScope>("BeginScope()");
 
-                state.Should().BeEquivalentTo(expectedLog.State);
+                expectedLog.Assert(state);
 
                 this.mock.expectedLogActionsIndex++;
 
@@ -179,29 +144,7 @@ namespace PosInformatique.Logging.Assertions
             {
                 var expectedLog = this.GetCurrentExpectedLogAction<ExpectedLogMessage>("Log()");
 
-                if (logLevel != expectedLog.LogLevel)
-                {
-                    Services.ThrowException($"Wrong log level for the Log() method call. (Expected: {expectedLog.LogLevel}, Actual: {logLevel})");
-                }
-
-                var message = formatter(state, exception);
-
-                if (message != expectedLog.Message)
-                {
-                    Services.ThrowException($"Wrong log message for the Log({logLevel}) method call. (Expected: '{expectedLog.Message}', Actual: '{message}')");
-                }
-
-                if (expectedLog.Exception != null)
-                {
-                    if (exception is null)
-                    {
-                        Services.ThrowException($"Expected an exception but no exeception has been thrown.");
-                    }
-                    else
-                    {
-                        expectedLog.Exception(exception);
-                    }
-                }
+                expectedLog.Assert(logLevel, state, exception, formatter);
 
                 this.mock.expectedLogActionsIndex++;
             }
@@ -218,7 +161,7 @@ namespace PosInformatique.Logging.Assertions
                 if (expectedLogAction is not TLogAction expectedLogActionTyped)
                 {
                     Services.ThrowException($"The '{methodCall}' method has been called but expected other action (Expected: {expectedLogAction.Name})");
-                    throw new NotImplementedException();
+                    throw new NotImplementedException("Must not be called.");
                 }
 
                 return expectedLogActionTyped;
@@ -242,47 +185,161 @@ namespace PosInformatique.Logging.Assertions
             }
         }
 
-        private sealed class ExpectedLogMessage : ExpectedLogAction
+        private sealed class ExpectedLogMessage : ExpectedLogAction, ILoggerMockSetupSequenceError
         {
-            public ExpectedLogMessage(LogLevel logLevel, string message)
+            private readonly LogLevel logLevel;
+
+            private readonly string message;
+
+            private Action<Exception>? exception;
+
+            private Arguments? arguments;
+
+            public ExpectedLogMessage(LoggerMockSetupSequence sequence, LogLevel logLevel, string message)
+                : base(sequence)
             {
-                this.LogLevel = logLevel;
-                this.Message = message;
+                this.logLevel = logLevel;
+                this.message = message;
             }
 
             public override string Name => "Message";
 
-            public LogLevel LogLevel { get; }
+            public override string ExceptionDisplayMessage => $"{this.Name}: ({this.message})";
 
-            public string Message { get; }
+            public ILoggerMockSetupSequence WithArguments(int count, Action<LogMessageTemplateArguments> arguments)
+            {
+                this.arguments = new Arguments(count, arguments);
 
-            public Action<Exception>? Exception { get; set; }
+                return this;
+            }
 
-            public override string ExceptionDisplayMessage => $"{this.Name}: ({this.Message})";
+            public ILoggerMockSetupSequence WithException(Action<Exception> exception)
+            {
+                this.exception = exception;
+
+                return this;
+            }
+
+            public void Assert<TState>(LogLevel logLevel, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+            {
+                if (logLevel != this.logLevel)
+                {
+                    Services.ThrowException($"Wrong log level for the Log() method call. (Expected: {this.logLevel}, Actual: {logLevel})");
+                }
+
+                if (this.arguments != null)
+                {
+                    var stateAsList = (IReadOnlyList<KeyValuePair<string, object?>>)state!;
+
+                    var originalMessage = stateAsList.Single(kv => kv.Key == "{OriginalFormat}");
+
+                    if (stateAsList.Count - 1 != this.arguments.Count)
+                    {
+                        Services.ThrowException($"Incorrect template message argument count for the '{originalMessage.Value}' template message. (Expected: '{this.arguments.Count}', Actual: '{stateAsList.Count}')");
+                    }
+
+                    var messageArguments = new LogMessageTemplateArguments(
+                        stateAsList.Where(kv => kv.Key != "{OriginalFormat}").ToDictionary(kv => kv.Key, kv => kv.Value));
+
+                    this.arguments.Action(messageArguments);
+                }
+                else
+                {
+                    var message = formatter(state, exception);
+
+                    if (message != this.message)
+                    {
+                        Services.ThrowException($"Wrong log message for the Log({logLevel}) method call. (Expected: '{this.message}', Actual: '{message}')");
+                    }
+                }
+
+                if (this.exception != null)
+                {
+                    if (exception is null)
+                    {
+                        Services.ThrowException($"Expected an exception but no exeception has been thrown.");
+                    }
+                    else
+                    {
+                        this.exception(exception);
+                    }
+                }
+            }
+
+            private sealed class Arguments
+            {
+                public Arguments(int count, Action<LogMessageTemplateArguments> action)
+                {
+                    this.Count = count;
+                    this.Action = action;
+                }
+
+                public int Count { get; }
+
+                public Action<LogMessageTemplateArguments> Action { get; }
+            }
         }
 
         private sealed class ExpectedLogBeginScope : ExpectedLogAction
         {
-            public ExpectedLogBeginScope(object state)
+            private readonly object expectedState;
+
+            public ExpectedLogBeginScope(LoggerMockSetupSequence sequence, object state)
+                : base(sequence)
             {
-                this.State = state;
+                this.expectedState = state;
             }
 
             public override string Name => "BeginScope";
 
-            public object State { get; }
+            public void Assert(object? state)
+            {
+                state.Should().BeEquivalentTo(this.expectedState);
+            }
         }
 
         private sealed class ExpectedLogEndScope : ExpectedLogAction
         {
+            public ExpectedLogEndScope(LoggerMockSetupSequence sequence)
+                : base(sequence)
+            {
+            }
+
             public override string Name => "EndScope";
         }
 
-        private abstract class ExpectedLogAction
+        private abstract class ExpectedLogAction : ILoggerMockSetupSequence
         {
+            private readonly LoggerMockSetupSequence sequence;
+
+            protected ExpectedLogAction(LoggerMockSetupSequence sequence)
+            {
+                this.sequence = sequence;
+            }
+
             public abstract string Name { get; }
 
             public virtual string ExceptionDisplayMessage => this.Name;
+
+            public ILoggerMockSetupSequence BeginScope(object state)
+            {
+                return this.sequence.BeginScope(state);
+            }
+
+            public ILoggerMockSetupSequence EndScope()
+            {
+                return this.sequence.EndScope();
+            }
+
+            public ILoggerMockSetupSequenceLog Log(LogLevel logLevel, string message)
+            {
+                return this.sequence.Log(logLevel, message);
+            }
+
+            public ILoggerMockSetupSequenceError LogError(string message)
+            {
+                return this.sequence.LogError(message);
+            }
         }
     }
 }
