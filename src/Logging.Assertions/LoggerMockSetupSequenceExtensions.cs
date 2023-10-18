@@ -15,6 +15,18 @@ namespace PosInformatique.Logging.Assertions
     public static class LoggerMockSetupSequenceExtensions
     {
         /// <summary>
+        /// Expect the call to the <see cref="ILogger.BeginScope{TState}(TState)"/> method.
+        /// </summary>
+        /// <param name="sequence"><see cref="ILoggerMockSetupSequence"/> to setup the sequence.</param>
+        /// <param name="state">Expected state of the <see cref="ILogger.BeginScope{TState}(TState)"/> call. The state object actual and expected
+        /// are compared by equivalence (property by property) and not by instance.</param>
+        /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
+        public static ILoggerMockSetupSequence BeginScope(this ILoggerMockSetupSequence sequence, object state)
+        {
+            return sequence.BeginScope<object>(expectedState => state.Should().BeEquivalentTo(state));
+        }
+
+        /// <summary>
         /// Expect the call to the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> method
         /// with a <see cref="LogLevel.Debug"/> log level.
         /// </summary>

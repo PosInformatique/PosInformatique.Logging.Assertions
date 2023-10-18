@@ -7,6 +7,7 @@
 namespace PosInformatique.Logging.Assertions
 {
     using System.Diagnostics.CodeAnalysis;
+    using System.Net.NetworkInformation;
     using FluentAssertions;
     using FluentAssertions.Common;
     using Microsoft.Extensions.Logging;
@@ -78,9 +79,9 @@ namespace PosInformatique.Logging.Assertions
                 this.mock = mock;
             }
 
-            public ILoggerMockSetupSequence BeginScope(object state)
+            public ILoggerMockSetupSequence BeginScope<TState>(Action<TState> state)
             {
-                var logBeginScope = new ExpectedLogBeginScope(this, state);
+                var logBeginScope = new ExpectedLogBeginScope<TState>(this, state);
 
                 this.mock.expectedLogActions.Add(logBeginScope);
 
@@ -280,22 +281,39 @@ namespace PosInformatique.Logging.Assertions
             }
         }
 
-        private sealed class ExpectedLogBeginScope : ExpectedLogAction
+        private sealed class ExpectedLogBeginScope<TExpectedState> : ExpectedLogBeginScope
         {
-            private readonly object expectedState;
+            private readonly Action<TExpectedState> assert;
 
-            public ExpectedLogBeginScope(LoggerMockSetupSequence sequence, object state)
+            public ExpectedLogBeginScope(LoggerMockSetupSequence sequence, Action<TExpectedState> state)
                 : base(sequence)
             {
-                this.expectedState = state;
+                this.assert = state;
+            }
+
+            public override void Assert<TState>(TState state)
+            {
+                if (state is TExpectedState expectedState)
+                {
+                    this.assert(expectedState);
+                }
+                else
+                {
+                    Services.ThrowException($"The 'BeginScope()' has been called with a wrong state argument type (Expected: {typeof(TExpectedState).Name}, Actual: {typeof(TState).Name}).");
+                }
+            }
+        }
+
+        private abstract class ExpectedLogBeginScope : ExpectedLogAction
+        {
+            protected ExpectedLogBeginScope(LoggerMockSetupSequence sequence)
+                : base(sequence)
+            {
             }
 
             public override string Name => "BeginScope";
 
-            public void Assert(object? state)
-            {
-                state.Should().BeEquivalentTo(this.expectedState);
-            }
+            public abstract void Assert<TState>(TState state);
         }
 
         private sealed class ExpectedLogEndScope : ExpectedLogAction
@@ -321,7 +339,7 @@ namespace PosInformatique.Logging.Assertions
 
             public virtual string ExceptionDisplayMessage => this.Name;
 
-            public ILoggerMockSetupSequence BeginScope(object state)
+            public ILoggerMockSetupSequence BeginScope<TState>(Action<TState> state)
             {
                 return this.sequence.BeginScope(state);
             }

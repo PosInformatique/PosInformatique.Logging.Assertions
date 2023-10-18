@@ -16,9 +16,11 @@ namespace PosInformatique.Logging.Assertions
         /// <summary>
         /// Expect the call to the <see cref="ILogger.BeginScope{TState}(TState)"/> method.
         /// </summary>
-        /// <param name="state">State instance of the <see cref="BeginScope(object)"/> method argument expected.</param>
+        /// <typeparam name="TState">Type of the state expected.</typeparam>
+        /// <param name="state">Delegate called to assert the content of the state when the
+        /// the <see cref="ILogger.BeginScope{TState}(TState)"/> is called.</param>
         /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
-        ILoggerMockSetupSequence BeginScope(object state);
+        ILoggerMockSetupSequence BeginScope<TState>(Action<TState> state);
 
         /// <summary>
         /// Expect the call to the <see cref="IDisposable.Dispose"/> method which represents the scope
