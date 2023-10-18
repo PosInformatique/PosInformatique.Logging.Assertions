@@ -6,6 +6,7 @@
 
 namespace PosInformatique.Logging.Assertions
 {
+    using System.Collections.Generic;
     using FluentAssertions;
     using Microsoft.Extensions.Logging;
 
@@ -15,7 +16,7 @@ namespace PosInformatique.Logging.Assertions
     public static class LoggerMockSetupSequenceExtensions
     {
         /// <summary>
-        /// Expect the call to the <see cref="ILogger.BeginScope{TState}(TState)"/> method.
+        /// Expect the call to the <see cref="ILogger.BeginScope{TState}(TState)"/> method with the specified <paramref name="state"/> object.
         /// </summary>
         /// <param name="sequence"><see cref="ILoggerMockSetupSequence"/> to setup the sequence.</param>
         /// <param name="state">Expected state of the <see cref="ILogger.BeginScope{TState}(TState)"/> call. The state object actual and expected
@@ -24,6 +25,31 @@ namespace PosInformatique.Logging.Assertions
         public static ILoggerMockSetupSequence BeginScope(this ILoggerMockSetupSequence sequence, object state)
         {
             return sequence.BeginScope<object>(expectedState => state.Should().BeEquivalentTo(state));
+        }
+
+        /// <summary>
+        /// Expect the call to the <see cref="ILogger.BeginScope{TState}(TState)"/> method with a <see cref="Dictionary{TKey, TValue}"/>
+        /// of <see cref="string"/>/<see cref="object"/> represents by the <paramref name="state"/> object instance.
+        /// The dictionary is compared by all the public property of the specified <paramref name="state"/> object instance.
+        /// </summary>
+        /// <param name="sequence"><see cref="ILoggerMockSetupSequence"/> to setup the sequence.</param>
+        /// <param name="state">Expected state of the <see cref="ILogger.BeginScope{TState}(TState)"/> call. The properties of the expected object <paramref name="state"/>
+        /// is compared by a dictionary of <see cref="string"/>/<see cref="object"/> specified in the argument when calling the
+        /// <see cref="ILogger.BeginScope{TState}(TState)"/> method.</param>
+        /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
+        public static ILoggerMockSetupSequence BeginScopeAsDictionary(this ILoggerMockSetupSequence sequence, object state)
+        {
+            return sequence.BeginScope<IDictionary<string, object>>(expectedState =>
+            {
+                var actualState = new Dictionary<string, object>();
+
+                foreach (var property in state.GetType().GetProperties())
+                {
+                    actualState.Add(property.Name, property.GetValue(state));
+                }
+
+                actualState.Should().BeEquivalentTo(expectedState);
+            });
         }
 
         /// <summary>
