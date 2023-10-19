@@ -12,6 +12,7 @@
     <PackageReleaseNotes>
 		1.2.0
 		- Improve the BeginScope() to use a delegate to assert complex state objects.
+		- Add a BeginScopeAsDictionary() method to check the state as dictionary string/object (useful for Application Insights logs).
 		
 		1.1.0
 		- Add the support to assert the log message template and the parameters.
