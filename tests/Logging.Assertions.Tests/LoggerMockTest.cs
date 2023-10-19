@@ -434,6 +434,21 @@ namespace PosInformatique.Logging.Assertions.Tests
         }
 
         [Fact]
+        public void BeginScope_AnonymousObjectAssertion_DifferentProperty()
+        {
+            var logger = new LoggerMock<ObjectToLog>();
+            logger.SetupSequence()
+                .LogTrace("Log Trace 1")
+                .BeginScope(new { DifferentProperty = "Other value" });
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.InvokeWithScopeAsAnonymousObject())
+                .Should().ThrowExactly<XunitException>()
+                .And.Message.StartsWith("Expectation has property state.ScopeLevel that the other object does not have.\r\nExpectation has property state.ScopeName that the other object does not have.");
+        }
+
+        [Fact]
         public void BeginScope_Expected()
         {
             var logger = new LoggerMock<ObjectToLog>();
@@ -470,7 +485,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         }
 
         [Fact]
-        public void BeginScope_Dictionary_ExpectedMissingProperty()
+        public void BeginScopeAsDictionary_ExpectedMissingProperty()
         {
             var logger = new LoggerMock<ObjectToLog>();
             logger.SetupSequence()
@@ -485,7 +500,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         }
 
         [Fact]
-        public void BeginScope_Dictionary_ExpectedLessProperties()
+        public void BeginScopeAsDictionary_ExpectedLessProperties()
         {
             var logger = new LoggerMock<ObjectToLog>();
             logger.SetupSequence()
@@ -617,6 +632,25 @@ namespace PosInformatique.Logging.Assertions.Tests
                     this.logger.LogDebug("Log Debug {0}", 2);
 
                     using (var scope2 = this.logger.BeginScope(new State { ScopeLevel = 2, ScopeName = "Scope level 2" }))
+                    {
+                        this.logger.LogInformation("Log Information {0}", 3);
+                    }
+
+                    this.logger.LogWarning("Log Warning {0}", 4);
+                }
+
+                this.logger.LogError("Log Error {0}", 5);
+            }
+
+            public void InvokeWithScopeAsAnonymousObject()
+            {
+                this.logger.LogTrace("Log Trace {0}", 1);
+
+                using (var scope1 = this.logger.BeginScope(new { ScopeLevel = 1, ScopeName = "Scope level 1" }))
+                {
+                    this.logger.LogDebug("Log Debug {0}", 2);
+
+                    using (var scope2 = this.logger.BeginScope(new { ScopeLevel = 2, ScopeName = "Scope level 2" }))
                     {
                         this.logger.LogInformation("Log Information {0}", 3);
                     }

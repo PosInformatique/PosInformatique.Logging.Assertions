@@ -24,7 +24,7 @@ namespace PosInformatique.Logging.Assertions
         /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
         public static ILoggerMockSetupSequence BeginScope(this ILoggerMockSetupSequence sequence, object state)
         {
-            return sequence.BeginScope<object>(expectedState => state.Should().BeEquivalentTo(state));
+            return sequence.BeginScope<object>(expectedState => state.Should().BeEquivalentTo(expectedState));
         }
 
         /// <summary>
