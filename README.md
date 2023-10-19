@@ -289,7 +289,88 @@ logger.SetupSequence()
     ... // Continue the setup expected log sequence
 ```
 
-### Assertion fail messages
+### Test the BeginScope() state
+If you use the `BeginScope` method in your logging process, you can assert the content of state
+specified in argument using two methods.
+
+For example, to assert the following code:
+```
+using (this.logger.BeginScope(new StateInfo() { Id = 1234 }))
+{
+    ... // Other Log
+}
+```
+
+With the `StateInfo` class as simple like like that:
+```csharp
+public class StateInfo
+{
+    public int Id { get; set; }
+}
+```
+
+You can assert the `BeginScope()` method call using an anonymous object:
+
+```csharp
+var logger = new LoggerMock<CustomerManager>();
+logger.SetupSequence()
+    .BeginScope(new { Id = 1234 })
+       ... // Other Log() assertions
+    .EndScope();
+```
+
+> The `BeginScope()` assertion check the equivalence (property by property and not the reference itself)
+between the actual object in the code and the expected object in the assertion.
+
+Or you can assert the `BeginScope()` method call using a delegate if your state object is complex:
+
+```csharp
+var logger = new LoggerMock<CustomerManager>();
+logger.SetupSequence()
+    .BeginScope<State>(state =>
+    {
+        state.Id.Should().Be(1234);
+    })
+       ... // Other Log() assertions
+    .EndScope();
+```
+
+### Application Insights dictionary state
+If you use Application Insights as output of your logs, the `BeginScope()` state argument must take a dictionary of string/object as the following code sample:
+
+```
+using (this.logger.BeginScope(new Dictionary<string, object>() { { "Id", 1234 } }))
+{
+    ... // Other Log
+}
+```
+
+To assert the `BeginScope()` in the previous sample code, you can use the `SetupSequence().BeginScope(Object)` method assertion as pass the expected
+dictionary as argument.
+
+```csharp
+var logger = new LoggerMock<CustomerManager>();
+logger.SetupSequence()
+    .BeginScope(new Dictionary<string, object>() { { "Id", 1234 } })
+       ... // Other Log() assertions
+    .EndScope();
+```
+
+The [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library provides a
+`SetupSequence().BeginScopeAsDictionary(Object)` method which allows to assert the content of the dictionary using an object (Each property and his value of the expected
+object is considered as a key/value couple of the dictionary). Do not hesitate to use anonymous object in your unit test to make the code more easy to read.
+
+The following example have the same behavior as the previous example, but is more easy to read by removing the dictionary instantiation and some extract brackets:
+
+```csharp
+var logger = new LoggerMock<CustomerManager>();
+logger.SetupSequence()
+    .BeginScopeAsDictionary(new { Id = 1234 })
+       ... // Other Log() assertions
+    .EndScope();
+```
+
+## Assertion fail messages
 The [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library
 try to make the assert fail messages the most easy to understand for the developers:
 

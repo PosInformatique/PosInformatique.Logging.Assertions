@@ -342,7 +342,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         }
 
         [Fact]
-        public void VerifyAllLogs_WithScopes()
+        public void VerifyAllLogs_WithScopes_ObjectAssertion()
         {
             var logger = new LoggerMock<ObjectToLog>();
             logger.SetupSequence()
@@ -364,7 +364,92 @@ namespace PosInformatique.Logging.Assertions.Tests
         }
 
         [Fact]
-        public void VerifyAllLogs_WithScopes_BeginScopeExpected()
+        public void VerifyAllLogs_WithScopes_DictionaryAssertion()
+        {
+            var logger = new LoggerMock<ObjectToLog>();
+            logger.SetupSequence()
+                .LogTrace("Log Trace 1")
+                .BeginScopeAsDictionary(new { ScopeLevel = 1, ScopeName = "Scope level 1" })
+                    .LogDebug("Log Debug 2")
+                    .BeginScopeAsDictionary(new { ScopeLevel = 2, ScopeName = "Scope level 2" })
+                        .LogInformation("Log Information 3")
+                    .EndScope()
+                    .LogWarning("Log Warning 4")
+                .EndScope()
+                .LogError("Log Error 5");
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.InvokeWithScopeAsDictionary();
+
+            logger.VerifyLogs();
+        }
+
+        [Fact]
+        public void VerifyAllLogs_WithScopes_DelegateAssertion()
+        {
+            var logger = new LoggerMock<ObjectToLog>();
+            logger.SetupSequence()
+                .LogTrace("Log Trace 1")
+                .BeginScope<State>(state =>
+                {
+                    state.ScopeLevel.Should().Be(1);
+                    state.ScopeName.Should().Be("Scope level 1");
+                })
+                    .LogDebug("Log Debug 2")
+                    .BeginScope<State>(state =>
+                    {
+                        state.ScopeLevel.Should().Be(2);
+                        state.ScopeName.Should().Be("Scope level 2");
+                    })
+                        .LogInformation("Log Information 3")
+                    .EndScope()
+                    .LogWarning("Log Warning 4")
+                .EndScope()
+                .LogError("Log Error 5");
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.InvokeWithScope();
+
+            logger.VerifyLogs();
+        }
+
+        [Fact]
+        public void BeginScope_DelegateAssertion_WrongExpectedStateType()
+        {
+            var logger = new LoggerMock<ObjectToLog>();
+            logger.SetupSequence()
+                .LogTrace("Log Trace 1")
+                .BeginScope<DateTime>(state =>
+                {
+                    throw new XunitException("Must not be called");
+                });
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.InvokeWithScope())
+                .Should().ThrowExactly<XunitException>()
+                .WithMessage("The 'BeginScope()' has been called with a wrong state argument type (Expected: DateTime, Actual: State).");
+        }
+
+        [Fact]
+        public void BeginScope_AnonymousObjectAssertion_DifferentProperty()
+        {
+            var logger = new LoggerMock<ObjectToLog>();
+            logger.SetupSequence()
+                .LogTrace("Log Trace 1")
+                .BeginScope(new { DifferentProperty = "Other value" });
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.InvokeWithScopeAsAnonymousObject())
+                .Should().ThrowExactly<XunitException>()
+                .And.Message.StartsWith("Expectation has property state.ScopeLevel that the other object does not have.\r\nExpectation has property state.ScopeName that the other object does not have.");
+        }
+
+        [Fact]
+        public void BeginScope_Expected()
         {
             var logger = new LoggerMock<ObjectToLog>();
             logger.SetupSequence()
@@ -379,7 +464,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         }
 
         [Fact]
-        public void VerifyAllLogs_WithScopes_EndScopeExpected()
+        public void BeginScope_EndScopeExpected()
         {
             var logger = new LoggerMock<ObjectToLog>();
             logger.SetupSequence()
@@ -397,6 +482,36 @@ namespace PosInformatique.Logging.Assertions.Tests
             objectToLog.Invoking(o => o.InvokeWithScope())
                 .Should().ThrowExactly<XunitException>()
                 .WithMessage("The 'Dispose()' method has been called but expected other action (Expected: Message)");
+        }
+
+        [Fact]
+        public void BeginScopeAsDictionary_ExpectedMissingProperty()
+        {
+            var logger = new LoggerMock<ObjectToLog>();
+            logger.SetupSequence()
+                .LogTrace("Log Trace 1")
+                .BeginScopeAsDictionary(new { ScopeLevel = 1, ScopeName = "Scope level 1", ExpectedProperty = "The expected value" });
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.InvokeWithScopeAsDictionary())
+                .Should().ThrowExactly<XunitException>()
+                .And.Message.StartsWith("Expected actualState to be a dictionary with 2 item(s), but has additional key(s) {\"ExpectedProperty\"}");
+        }
+
+        [Fact]
+        public void BeginScopeAsDictionary_ExpectedLessProperties()
+        {
+            var logger = new LoggerMock<ObjectToLog>();
+            logger.SetupSequence()
+                .LogTrace("Log Trace 1")
+                .BeginScopeAsDictionary(new { ScopeLevel = 1 });
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.InvokeWithScopeAsDictionary())
+                .Should().ThrowExactly<XunitException>()
+                .And.Message.StartsWith("Expected actualState to be a dictionary with 2 item(s), but it misses key(s) {\"ScopeName\"}");
         }
 
         [Fact]
@@ -449,6 +564,13 @@ namespace PosInformatique.Logging.Assertions.Tests
             objectToLog.InvokeWithExceptionChainedWithLogError(exception);
 
             logger.VerifyLogs();
+        }
+
+        private class State
+        {
+            public int ScopeLevel { get; set; }
+
+            public string? ScopeName { get; set; }
         }
 
         private class ObjectToLog
@@ -505,11 +627,49 @@ namespace PosInformatique.Logging.Assertions.Tests
             {
                 this.logger.LogTrace("Log Trace {0}", 1);
 
+                using (var scope1 = this.logger.BeginScope(new State { ScopeLevel = 1, ScopeName = "Scope level 1" }))
+                {
+                    this.logger.LogDebug("Log Debug {0}", 2);
+
+                    using (var scope2 = this.logger.BeginScope(new State { ScopeLevel = 2, ScopeName = "Scope level 2" }))
+                    {
+                        this.logger.LogInformation("Log Information {0}", 3);
+                    }
+
+                    this.logger.LogWarning("Log Warning {0}", 4);
+                }
+
+                this.logger.LogError("Log Error {0}", 5);
+            }
+
+            public void InvokeWithScopeAsAnonymousObject()
+            {
+                this.logger.LogTrace("Log Trace {0}", 1);
+
                 using (var scope1 = this.logger.BeginScope(new { ScopeLevel = 1, ScopeName = "Scope level 1" }))
                 {
                     this.logger.LogDebug("Log Debug {0}", 2);
 
                     using (var scope2 = this.logger.BeginScope(new { ScopeLevel = 2, ScopeName = "Scope level 2" }))
+                    {
+                        this.logger.LogInformation("Log Information {0}", 3);
+                    }
+
+                    this.logger.LogWarning("Log Warning {0}", 4);
+                }
+
+                this.logger.LogError("Log Error {0}", 5);
+            }
+
+            public void InvokeWithScopeAsDictionary()
+            {
+                this.logger.LogTrace("Log Trace {0}", 1);
+
+                using (var scope1 = this.logger.BeginScope(new Dictionary<string, object> { { "ScopeLevel", 1 }, { "ScopeName", "Scope level 1" } }))
+                {
+                    this.logger.LogDebug("Log Debug {0}", 2);
+
+                    using (var scope2 = this.logger.BeginScope(new Dictionary<string, object> { { "ScopeLevel", 2 }, { "ScopeName", "Scope level 2" } }))
                     {
                         this.logger.LogInformation("Log Information {0}", 3);
                     }
