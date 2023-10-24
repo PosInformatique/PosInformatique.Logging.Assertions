@@ -157,8 +157,9 @@ namespace PosInformatique.Logging.Assertions.Tests
             var logger = new LoggerMock<ObjectToLog>();
             logger.SetupSequence()
                 .LogInformation("Log before error")
-                .LogError("Log Error")
+                .LogError("Log Error {Id}")
                     .WithException(exception)
+                    .WithArguments(1234)
                 .LogTrace("Log Trace after error")
                 .LogDebug("Log Debug after error")
                 .LogInformation("Log Information after error")
@@ -180,8 +181,9 @@ namespace PosInformatique.Logging.Assertions.Tests
             var logger = new LoggerMock<ObjectToLog>();
             logger.SetupSequence()
                 .LogInformation("Log before error")
-                .LogError("Log Error")
+                .LogError("Log Error {Id}")
                     .WithException(e => e.Should().BeSameAs(exception))
+                    .WithArguments(1234)
                 .LogTrace("Log Trace after error")
                 .LogDebug("Log Debug after error")
                 .LogInformation("Log Information after error")
@@ -203,8 +205,9 @@ namespace PosInformatique.Logging.Assertions.Tests
             var logger = new LoggerMock<ObjectToLog>();
             logger.SetupSequence()
                 .LogInformation("Log before error")
-                .LogError("Log Error")
+                .LogError("Log Error {Id}")
                     .WithException(new DivideByZeroException("Other exception"))
+                    .WithArguments(1234)
                 .LogTrace("Log Trace after error")
                 .LogDebug("Log Debug after error")
                 .LogInformation("Log Information after error")
@@ -280,6 +283,7 @@ namespace PosInformatique.Logging.Assertions.Tests
                 .LogInformation("Log information with parameters {Id}, {Name} and {Object}")
                     .WithArguments(100, args =>
                     {
+                        args.Should().HaveCount(3);
                         args["Id"].Should().Be(1234);
                         args["Name"].Should().Be("The name");
                         args["Object"].Should().BeEquivalentTo(new { Property = "I am object" });
@@ -290,7 +294,7 @@ namespace PosInformatique.Logging.Assertions.Tests
 
             objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
                 .Should().ThrowExactly<XunitException>()
-                .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '100', Actual: '4')");
+                .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '100', Actual: '3')");
         }
 
         [Fact]
@@ -322,7 +326,7 @@ namespace PosInformatique.Logging.Assertions.Tests
 
             objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
                 .Should().ThrowExactly<XunitException>()
-                .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '9', Actual: '4')");
+                .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '9', Actual: '3')");
         }
 
         [Fact]
@@ -594,7 +598,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             public void InvokeWithException(Exception exception)
             {
                 this.logger.LogInformation("Log before error");
-                this.logger.LogError(exception, "Log Error");
+                this.logger.LogError(exception, "Log Error {Id}", 1234);
                 this.logger.LogTrace("Log Trace after error");
                 this.logger.LogDebug("Log Debug after error");
                 this.logger.LogInformation("Log Information after error");
