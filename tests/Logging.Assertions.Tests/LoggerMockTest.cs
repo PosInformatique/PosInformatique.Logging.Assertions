@@ -280,6 +280,7 @@ namespace PosInformatique.Logging.Assertions.Tests
                 .LogInformation("Log information with parameters {Id}, {Name} and {Object}")
                     .WithArguments(100, args =>
                     {
+                        args.Should().HaveCount(3);
                         args["Id"].Should().Be(1234);
                         args["Name"].Should().Be("The name");
                         args["Object"].Should().BeEquivalentTo(new { Property = "I am object" });
@@ -290,7 +291,7 @@ namespace PosInformatique.Logging.Assertions.Tests
 
             objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
                 .Should().ThrowExactly<XunitException>()
-                .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '100', Actual: '4')");
+                .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '100', Actual: '3')");
         }
 
         [Fact]
@@ -322,7 +323,7 @@ namespace PosInformatique.Logging.Assertions.Tests
 
             objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
                 .Should().ThrowExactly<XunitException>()
-                .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '9', Actual: '4')");
+                .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '9', Actual: '3')");
         }
 
         [Fact]

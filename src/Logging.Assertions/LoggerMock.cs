@@ -236,7 +236,7 @@ namespace PosInformatique.Logging.Assertions
 
                     if (stateAsList.Count - 1 != this.arguments.Count)
                     {
-                        Services.ThrowException($"Incorrect template message argument count for the '{originalMessage.Value}' template message. (Expected: '{this.arguments.Count}', Actual: '{stateAsList.Count}')");
+                        Services.ThrowException($"Incorrect template message argument count for the '{originalMessage.Value}' template message. (Expected: '{this.arguments.Count}', Actual: '{stateAsList.Count - 1}')");
                     }
 
                     var messageArguments = new LogMessageTemplateArguments(
