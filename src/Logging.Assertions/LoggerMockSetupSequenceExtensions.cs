@@ -106,7 +106,7 @@ namespace PosInformatique.Logging.Assertions
         /// <param name="sequence"><see cref="ILoggerMockSetupSequence"/> to setup the sequence.</param>
         /// <param name="expectedException"><see cref="Exception"/> instance expected.</param>
         /// <returns>An instance of <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the method calls.</returns>
-        public static ILoggerMockSetupSequence WithException(this ILoggerMockSetupSequenceError sequence, Exception expectedException)
+        public static ILoggerMockSetupSequenceLog WithException(this ILoggerMockSetupSequenceError sequence, Exception expectedException)
         {
             return sequence.WithException(actualException => actualException.Should().BeSameAs(expectedException));
         }

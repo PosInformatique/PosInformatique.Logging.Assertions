@@ -214,7 +214,7 @@ namespace PosInformatique.Logging.Assertions
                 return this;
             }
 
-            public ILoggerMockSetupSequence WithException(Action<Exception> exception)
+            public ILoggerMockSetupSequenceLog WithException(Action<Exception> exception)
             {
                 this.exception = exception;
 

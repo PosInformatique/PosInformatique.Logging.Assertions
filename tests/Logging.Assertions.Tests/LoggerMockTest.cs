@@ -157,8 +157,9 @@ namespace PosInformatique.Logging.Assertions.Tests
             var logger = new LoggerMock<ObjectToLog>();
             logger.SetupSequence()
                 .LogInformation("Log before error")
-                .LogError("Log Error")
+                .LogError("Log Error {Id}")
                     .WithException(exception)
+                    .WithArguments(1234)
                 .LogTrace("Log Trace after error")
                 .LogDebug("Log Debug after error")
                 .LogInformation("Log Information after error")
@@ -180,8 +181,9 @@ namespace PosInformatique.Logging.Assertions.Tests
             var logger = new LoggerMock<ObjectToLog>();
             logger.SetupSequence()
                 .LogInformation("Log before error")
-                .LogError("Log Error")
+                .LogError("Log Error {Id}")
                     .WithException(e => e.Should().BeSameAs(exception))
+                    .WithArguments(1234)
                 .LogTrace("Log Trace after error")
                 .LogDebug("Log Debug after error")
                 .LogInformation("Log Information after error")
@@ -203,8 +205,9 @@ namespace PosInformatique.Logging.Assertions.Tests
             var logger = new LoggerMock<ObjectToLog>();
             logger.SetupSequence()
                 .LogInformation("Log before error")
-                .LogError("Log Error")
+                .LogError("Log Error {Id}")
                     .WithException(new DivideByZeroException("Other exception"))
+                    .WithArguments(1234)
                 .LogTrace("Log Trace after error")
                 .LogDebug("Log Debug after error")
                 .LogInformation("Log Information after error")
@@ -595,7 +598,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             public void InvokeWithException(Exception exception)
             {
                 this.logger.LogInformation("Log before error");
-                this.logger.LogError(exception, "Log Error");
+                this.logger.LogError(exception, "Log Error {Id}", 1234);
                 this.logger.LogTrace("Log Trace after error");
                 this.logger.LogDebug("Log Debug after error");
                 this.logger.LogInformation("Log Information after error");

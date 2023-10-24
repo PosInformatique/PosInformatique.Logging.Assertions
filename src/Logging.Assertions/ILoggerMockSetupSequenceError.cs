@@ -20,6 +20,6 @@ namespace PosInformatique.Logging.Assertions
         /// </summary>
         /// <param name="exception">Delegate which allows to analyze the content of the <see cref="Exception"/>.</param>
         /// <returns>An instance of <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the method calls.</returns>
-        ILoggerMockSetupSequence WithException(Action<Exception> exception);
+        ILoggerMockSetupSequenceLog WithException(Action<Exception> exception);
     }
 }
