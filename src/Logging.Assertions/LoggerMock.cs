@@ -6,8 +6,6 @@
 
 namespace PosInformatique.Logging.Assertions
 {
-    using System.Diagnostics.CodeAnalysis;
-    using System.Net.NetworkInformation;
     using FluentAssertions;
     using FluentAssertions.Common;
     using Microsoft.Extensions.Logging;
@@ -26,26 +24,25 @@ namespace PosInformatique.Logging.Assertions
     ///         calls to the <see cref="ILogger"/> methods.</item>
     /// </list>
     /// </summary>
-    /// <typeparam name="TCategoryName">The category name of the <see cref="ILogger{TCategoryName}"/> to create.</typeparam>
-    public sealed class LoggerMock<TCategoryName>
+    public class LoggerMock
     {
         private readonly IList<ExpectedLogAction> expectedLogActions;
 
         private int expectedLogActionsIndex;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="LoggerMock{TCategoryName}"/> class.
+        /// Initializes a new instance of the <see cref="LoggerMock"/> class.
         /// </summary>
         public LoggerMock()
         {
             this.expectedLogActions = new List<ExpectedLogAction>();
-            this.Object = new LoggerRecorder(this);
+            this.Object = this.CreateRecorder<object>();
         }
 
         /// <summary>
-        /// Gets the mocked instance of the <see cref="ILogger{TCategoryName}"/>.
+        /// Gets the mocked instance of the <see cref="ILogger"/>.
         /// </summary>
-        public ILogger<TCategoryName> Object { get; }
+        public ILogger Object { get; }
 
         /// <summary>
         /// Entry method which allows to setup the sequence of the expected <see cref="ILogger"/> method calls.
@@ -70,11 +67,21 @@ namespace PosInformatique.Logging.Assertions
             }
         }
 
+        /// <summary>
+        /// Creates an instance of <see cref="LoggerRecorder{TCategoryName}"/> to record <see cref="ILogger"/> trace.
+        /// </summary>
+        /// <typeparam name="TCategoryName">Type of the category name to use for <see cref="ILogger{TCategoryName}"/>.</typeparam>
+        /// <returns>An instance of <see cref="LoggerRecorder{TCategoryName}"/> to record <see cref="ILogger"/> trace.</returns>
+        private protected virtual ILogger CreateRecorder<TCategoryName>()
+        {
+            return new LoggerRecorder<TCategoryName>(this);
+        }
+
         private sealed class LoggerMockSetupSequence : ILoggerMockSetupSequence
         {
-            private readonly LoggerMock<TCategoryName> mock;
+            private readonly LoggerMock mock;
 
-            public LoggerMockSetupSequence(LoggerMock<TCategoryName> mock)
+            public LoggerMockSetupSequence(LoggerMock mock)
             {
                 this.mock = mock;
             }
@@ -116,11 +123,11 @@ namespace PosInformatique.Logging.Assertions
             }
         }
 
-        private sealed class LoggerRecorder : ILogger<TCategoryName>
+        private sealed class LoggerRecorder<TCategoryName> : ILogger, ILogger<TCategoryName>
         {
-            private readonly LoggerMock<TCategoryName> mock;
+            private readonly LoggerMock mock;
 
-            public LoggerRecorder(LoggerMock<TCategoryName> mock)
+            public LoggerRecorder(LoggerMock mock)
             {
                 this.mock = mock;
             }
@@ -170,18 +177,22 @@ namespace PosInformatique.Logging.Assertions
 
             private sealed class LogScopeDisposable : IDisposable
             {
-                private readonly LoggerRecorder recorder;
+                private readonly LoggerRecorder<TCategoryName> recorder;
 
-                public LogScopeDisposable(LoggerRecorder recorder)
+                public LogScopeDisposable(LoggerRecorder<TCategoryName> recorder)
                 {
                     this.recorder = recorder;
                 }
 
                 public void Dispose()
                 {
-                    this.recorder.GetCurrentExpectedLogAction<ExpectedLogEndScope>("Dispose()");
+                    // If an exception is ongoing, we don't thrown an exception an let the original exception propagated.
+                    if (!ExceptionHelper.IsExceptionOnGoing())
+                    {
+                        this.recorder.GetCurrentExpectedLogAction<ExpectedLogEndScope>("Dispose()");
 
-                    this.recorder.mock.expectedLogActionsIndex++;
+                        this.recorder.mock.expectedLogActionsIndex++;
+                    }
                 }
             }
         }

@@ -377,6 +377,26 @@ try to make the assert fail messages the most easy to understand for the develop
 ![Assertion Failed Too Many Calls](https://raw.githubusercontent.com/PosInformatique/PosInformatique.Logging.Assertions/main/docs/AssertionFailedTooManyCalls.png)
 ![Assertion Missing Logs](https://raw.githubusercontent.com/PosInformatique/PosInformatique.Logging.Assertions/main/docs/AssertionMissingLogs.png)
 
+## Non generic support of the ILogger interface
+The [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library
+allows to mock the `ILogger<T>` and `ILogger` interfaces.
+
+To mock a `ILogger<T>` implementation use the following code:
+```csharp
+var logger = new LoggerMock<CustomerManager>();
+logger.SetupSequence()
+    .LogInformation("...");
+```
+
+To mock a `ILogger` implementation use the following code:
+```csharp
+var logger = new LoggerMock();
+logger.SetupSequence()
+    .LogInformation("...");
+```
+
+Both usage offers the same fluent assertion methods.
+
 ## Library dependencies
 - The [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) target the .NET Standard 2.0
 and the version 2.0.0 of the [Microsoft.Extensions.Logging.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions) NuGet package. So this library can be used with

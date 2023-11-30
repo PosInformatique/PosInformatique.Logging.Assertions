@@ -11,12 +11,12 @@ namespace PosInformatique.Logging.Assertions.Tests
     using Xunit;
     using Xunit.Sdk;
 
-    public class LoggerMockTest
+    public abstract class LoggerMockTest
     {
         [Fact]
         public void VerifyAllLogs()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
@@ -34,7 +34,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void VerifyAllLogs_MissingLogs()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
@@ -62,7 +62,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LogTraceFailed()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace expected")
                 .LogDebug("Log Debug 2")
@@ -80,7 +80,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LogDebugFailed()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug expected")
@@ -98,7 +98,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LogInformationFailed()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
@@ -116,7 +116,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LogWarningFailed()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
@@ -134,7 +134,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LogErrorFailed()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
@@ -154,7 +154,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var exception = new FormatException("The exception");
 
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogInformation("Log before error")
                 .LogError("Log Error {Id}")
@@ -178,7 +178,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var exception = new FormatException("The exception");
 
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogInformation("Log before error")
                 .LogError("Log Error {Id}")
@@ -202,7 +202,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var exception = new FormatException("The exception");
 
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogInformation("Log before error")
                 .LogError("Log Error {Id}")
@@ -224,7 +224,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LogError_ExpectedExceptionButNoExceptionRaised()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
@@ -243,7 +243,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LogWrongLevel()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogWarning("Log Trace 1");
 
@@ -257,7 +257,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LogWithMessageTemplate_DelegateAssertion()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogInformation("Log information with parameters {Id}, {Name} and {Object}")
                     .WithArguments(3, args =>
@@ -278,7 +278,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LogWithMessageTemplate_DelegateAssertion_WrongExpectedArgumentCount()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogInformation("Log information with parameters {Id}, {Name} and {Object}")
                     .WithArguments(100, args =>
@@ -300,7 +300,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LogWithMessageTemplate_ParametersAssertion()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogInformation("Log information with parameters {Id}, {Name} and {Object}")
                     .WithArguments(1234, "The name", new { Property = "I am object" })
@@ -316,7 +316,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LogWithMessageTemplate_ParametersAssertion_WrongExpectedArgumentCount()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogInformation("Log information with parameters {Id}, {Name} and {Object}")
                     .WithArguments(1, 2, 3, 4, 5, 6, 7, "The name", new { Property = "I am object" })
@@ -332,7 +332,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void LoggerCalledToManyTimes()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
@@ -348,7 +348,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void VerifyAllLogs_WithScopes_ObjectAssertion()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .BeginScope(new { ScopeLevel = 1, ScopeName = "Scope level 1" })
@@ -370,7 +370,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void VerifyAllLogs_WithScopes_DictionaryAssertion()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .BeginScopeAsDictionary(new { ScopeLevel = 1, ScopeName = "Scope level 1" })
@@ -392,7 +392,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void VerifyAllLogs_WithScopes_DelegateAssertion()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .BeginScope<State>(state =>
@@ -422,7 +422,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void BeginScope_DelegateAssertion_WrongExpectedStateType()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .BeginScope<DateTime>(state =>
@@ -440,7 +440,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void BeginScope_AnonymousObjectAssertion_DifferentProperty()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .BeginScope(new { DifferentProperty = "Other value" });
@@ -455,7 +455,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void BeginScope_Expected()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2");
@@ -470,7 +470,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void BeginScope_EndScopeExpected()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .BeginScope(new { ScopeLevel = 1, ScopeName = "Scope level 1" })
@@ -491,7 +491,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void BeginScopeAsDictionary_ExpectedMissingProperty()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .BeginScopeAsDictionary(new { ScopeLevel = 1, ScopeName = "Scope level 1", ExpectedProperty = "The expected value" });
@@ -506,7 +506,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void BeginScopeAsDictionary_ExpectedLessProperties()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogTrace("Log Trace 1")
                 .BeginScopeAsDictionary(new { ScopeLevel = 1 });
@@ -521,7 +521,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         [Fact]
         public void IsEnabled_NotSupported()
         {
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
 
             logger.Object.Invoking(l => l.IsEnabled(LogLevel.Debug))
                 .Should().ThrowExactly<NotSupportedException>()
@@ -533,7 +533,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var exception = new FormatException("The exception");
 
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogError("Log Error")
                     .WithException(exception)
@@ -557,7 +557,7 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var exception = new FormatException("The exception");
 
-            var logger = new LoggerMock<ObjectToLog>();
+            var logger = this.CreateLogger();
             logger.SetupSequence()
                 .LogError("Log Error")
                     .WithException(exception)
@@ -570,6 +570,57 @@ namespace PosInformatique.Logging.Assertions.Tests
             logger.VerifyLogs();
         }
 
+        /// <summary>
+        /// Test the following scenario.
+        /// - BeginScope() block is used.
+        /// - Logs are assert inside this block
+        /// - An exception is throw inside the block.
+        /// => Expected: The exception is thrown, and no assertion exception must be raised in the Dispose() method
+        /// of the log record.
+        /// It will help the developer to know the original exception and not parasited by the exception of the library
+        /// thrown in the Dispose() method.
+        /// </summary>
+        [Fact]
+        public void LogWithException_InsideBeginScope()
+        {
+            var logger = this.CreateLogger();
+            logger.SetupSequence()
+                .LogTrace("Log Trace 1")
+                .BeginScope(new { ScopeLevel = 1, ScopeName = "Scope level 1" })
+                    .LogDebug("Log Debug 2")
+                    .BeginScope(new { ScopeLevel = 2, ScopeName = "Scope level 2" })
+                        .LogInformation("Log Information 3")
+                    .EndScope()
+                    .LogWarning("Log Warning 4")
+                .LogError("Log Error 5");
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.InvokeWithExceptionInScope())
+                .Should().ThrowExactly<FormatException>()
+                .WithMessage("The exception");
+        }
+
+        protected abstract LoggerMock CreateLogger();
+
+        public class Generic : LoggerMockTest
+        {
+            [Fact]
+            public void Object()
+            {
+                var generic = new LoggerMock<ObjectToLog>();
+
+                generic.Object.Should().BeSameAs(((LoggerMock)generic).Object);
+            }
+
+            protected override LoggerMock CreateLogger() => new LoggerMock<ObjectToLog>();
+        }
+
+        public class NonGeneric : LoggerMockTest
+        {
+            protected override LoggerMock CreateLogger() => new LoggerMock();
+        }
+
         private class State
         {
             public int ScopeLevel { get; set; }
@@ -579,9 +630,9 @@ namespace PosInformatique.Logging.Assertions.Tests
 
         private class ObjectToLog
         {
-            private readonly ILogger<ObjectToLog> logger;
+            private readonly ILogger logger;
 
-            public ObjectToLog(ILogger<ObjectToLog> logger)
+            public ObjectToLog(ILogger logger)
             {
                 this.logger = logger;
             }
@@ -688,6 +739,23 @@ namespace PosInformatique.Logging.Assertions.Tests
             {
                 this.logger.LogInformation("Log information with parameters {Id}, {Name} and {Object}", 1234, "The name", new { Property = "I am object" });
                 this.logger.LogError("Log error after message template");
+            }
+
+            public void InvokeWithExceptionInScope()
+            {
+                this.logger.LogTrace("Log Trace {0}", 1);
+
+                using (var scope1 = this.logger.BeginScope(new State { ScopeLevel = 1, ScopeName = "Scope level 1" }))
+                {
+                    this.logger.LogDebug("Log Debug {0}", 2);
+
+                    using (var scope2 = this.logger.BeginScope(new State { ScopeLevel = 2, ScopeName = "Scope level 2" }))
+                    {
+                        this.logger.LogInformation("Log Information {0}", 3);
+
+                        throw new FormatException("The exception");
+                    }
+                }
             }
         }
     }
