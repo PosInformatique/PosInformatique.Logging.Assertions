@@ -186,9 +186,13 @@ namespace PosInformatique.Logging.Assertions
 
                 public void Dispose()
                 {
-                    this.recorder.GetCurrentExpectedLogAction<ExpectedLogEndScope>("Dispose()");
+                    // If an exception is ongoing, we don't thrown an exception an let the original exception propagated. 
+                    if (!ExceptionHelper.IsExceptionOnGoing())
+                    {
+                        this.recorder.GetCurrentExpectedLogAction<ExpectedLogEndScope>("Dispose()");
 
-                    this.recorder.mock.expectedLogActionsIndex++;
+                        this.recorder.mock.expectedLogActionsIndex++;
+                    }
                 }
             }
         }
