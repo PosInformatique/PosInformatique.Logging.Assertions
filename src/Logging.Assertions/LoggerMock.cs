@@ -6,6 +6,7 @@
 
 namespace PosInformatique.Logging.Assertions
 {
+    using System.Globalization;
     using FluentAssertions;
     using FluentAssertions.Common;
     using Microsoft.Extensions.Logging;
@@ -104,6 +105,15 @@ namespace PosInformatique.Logging.Assertions
                 return logEndScope;
             }
 
+            public ILoggerMockSetupSequenceIsEnabled IsEnabled(LogLevel level)
+            {
+                var logIsEnabled = new ExpectedIsEnabledCondition(this, level);
+
+                this.mock.expectedLogActions.Add(logIsEnabled);
+
+                return logIsEnabled;
+            }
+
             public ILoggerMockSetupSequenceLog Log(LogLevel logLevel, string message)
             {
                 var logMessage = new ExpectedLogMessage(this, logLevel, message);
@@ -145,7 +155,13 @@ namespace PosInformatique.Logging.Assertions
 
             public bool IsEnabled(LogLevel logLevel)
             {
-                throw new NotSupportedException($"The mock of this method is not supported by the '{typeof(LoggerMock<>).Assembly.GetName().Name}' library.");
+                var expectedEnabledCondition = this.GetCurrentExpectedLogAction<ExpectedIsEnabledCondition>($"IsEnabled({logLevel})");
+
+                expectedEnabledCondition.Assert(logLevel);
+
+                this.mock.expectedLogActionsIndex++;
+
+                return expectedEnabledCondition.ReturnsValue;
             }
 
             public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
@@ -337,6 +353,38 @@ namespace PosInformatique.Logging.Assertions
             public override string Name => "EndScope";
         }
 
+        private sealed class ExpectedIsEnabledCondition : ExpectedLogAction, ILoggerMockSetupSequenceIsEnabled
+        {
+            private readonly LogLevel expectedLogLevel;
+
+            public ExpectedIsEnabledCondition(LoggerMockSetupSequence sequence, LogLevel expectedLogLevel)
+                : base(sequence)
+            {
+                this.expectedLogLevel = expectedLogLevel;
+            }
+
+            public override string Name => "IsEnabled";
+
+            public override string ExceptionDisplayMessage => $"{this.Name}({this.expectedLogLevel}) => return {this.ReturnsValue.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()}";
+
+            public bool ReturnsValue { get; private set; }
+
+            public ILoggerMockSetupSequence Returns(bool value)
+            {
+                this.ReturnsValue = value;
+
+                return this;
+            }
+
+            public void Assert(LogLevel logLevel)
+            {
+                if (this.expectedLogLevel != logLevel)
+                {
+                    Services.ThrowException($"The 'IsEnabled()' has been called with a wrong log level (Expected: {this.expectedLogLevel}, Actual: {logLevel}).");
+                }
+            }
+        }
+
         private abstract class ExpectedLogAction : ILoggerMockSetupSequence
         {
             private readonly LoggerMockSetupSequence sequence;
@@ -358,6 +406,11 @@ namespace PosInformatique.Logging.Assertions
             public ILoggerMockSetupSequence EndScope()
             {
                 return this.sequence.EndScope();
+            }
+
+            public ILoggerMockSetupSequenceIsEnabled IsEnabled(LogLevel level)
+            {
+                return this.sequence.IsEnabled(level);
             }
 
             public ILoggerMockSetupSequenceLog Log(LogLevel logLevel, string message)

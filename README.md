@@ -32,19 +32,19 @@ public class CustomerManager
 
     public async Task SendEmailAsync(int id, string name)
     {
-        this.logger.LogInformation($"Starting to send an email to the customer '{Name}' with the identifier '{Id}'", name, id);
+        this.logger.LogInformation("Starting to send an email to the customer '{Name}' with the identifier '{Id}'", name, id);
 
         using (this.logger.BeginScope(new { Id = id }))
         {
             try
             {
-                this.logger.LogDebug($"Call the SendAsync() method");
+                this.logger.LogDebug("Call the SendAsync() method");
 
                 await this.emailProvider.SendAsync(name);
 
-                this.logger.LogDebug($"SendAsync() method has been called.");
+                this.logger.LogDebug("SendAsync() method has been called.");
 
-                this.logger.LogInformation($"Email provider has been called.");
+                this.logger.LogInformation("Email provider has been called.");
             }
             catch (Exception exception)
             {
@@ -239,7 +239,7 @@ an delegate to assert complex arguments.
 
 For example, to assert the following log message:
 ```csharp
-this.logger.LogInformation($"Starting to send an email to the customer '{Name}' with the identifier '{Id}'", name, id);
+this.logger.LogInformation("Starting to send an email to the customer '{Name}' with the identifier '{Id}'", name, id);
 ```
 
 Using the first way with the `WithArguments(params object[] expectedArguments)` method:
@@ -368,6 +368,80 @@ logger.SetupSequence()
     .BeginScopeAsDictionary(new { Id = 1234 })
        ... // Other Log() assertions
     .EndScope();
+```
+
+### Test the IsEnabled() calls
+To test the call of the `IsEnabled(LogLevel)` call the setup method in the sequence with `LogLevel` expected. Also you have to define the value
+which have to be returned when method is called.
+
+For example, imagine the following code to test:
+```csharp
+public class CustomerManager
+{
+    private readonly ILogger<CustomerManager> logger;
+
+    public CustomerManager(ILogger<CustomerManager> logger)
+    {
+        this.logger = logger;
+    }
+
+    public string SendEmail(int id, string name)
+    {
+        if (this.logger.IsEnabled(LogLevel.Information))
+        {
+            this.logger.LogInformation("Starting to send an email to the customer.");
+
+            return "Log information enabled";
+        }
+
+        this.logger.LogDebug("The log information is not enabled...");
+
+        return "Log information not enabled";
+    }
+}
+```
+
+To test the previous code just write the following unit tests:
+
+```csharp
+public class CustomerManagerTest
+{
+    [Fact]
+    public void Test_WithInformationEnabled()
+    {
+        var logger = new LoggerMock<CustomerManager>();
+        logger.SetupSequence()
+            .IsEnabled(LogLevel.Information)
+                .Returns(true)
+            .LogInformation("Starting to send an email to the customer.");
+
+        var manager = new CustomerManager(logger.Object);
+
+        var result = manager.SendEmail();
+
+        result.Should().Be("Log information enabled");
+
+        logger.VerifyAllLogs();
+    }
+
+    [Fact]
+    public void Test_WithInformationDisabled()
+    {
+        var logger = new LoggerMock<CustomerManager>();
+        logger.SetupSequence()
+            .IsEnabled(LogLevel.Information)
+                .Returns(false)
+            .LogDebug("The log information is not enabled...");
+
+        var manager = new CustomerManager(logger.Object);
+
+        var result = manager.SendEmail();
+
+        result.Should().Be("Log information not enabled");
+
+        logger.VerifyAllLogs();
+    }
+}
 ```
 
 ## Assertion fail messages

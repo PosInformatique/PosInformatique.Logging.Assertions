@@ -18,11 +18,15 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var logger = this.CreateLogger();
             logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
                 .LogInformation("Log Information 3")
                 .LogWarning("Log Warning 4")
-                .LogError("Log Error 5");
+                .LogError("Log Error 5")
+                .IsEnabled(LogLevel.Error)
+                    .Returns(false);
 
             var objectToLog = new ObjectToLog(logger.Object);
 
@@ -36,13 +40,19 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var logger = this.CreateLogger();
             logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
                 .LogInformation("Log Information 3")
                 .LogWarning("Log Warning 4")
                 .LogError("Log Error 5")
+                .IsEnabled(LogLevel.Error)
+                    .Returns(false)
                 .LogInformation("Missing log Information")
                 .LogError("Missing log Error")
+                .IsEnabled(LogLevel.Warning)
+                    .Returns(false)
                 .BeginScope(new { })
                 .EndScope();
 
@@ -52,9 +62,10 @@ namespace PosInformatique.Logging.Assertions.Tests
 
             logger.Invoking(l => l.VerifyLogs())
                 .Should().ThrowExactly<XunitException>()
-                .WithMessage(@"Logger has been called few times (Expected: 9 calls, Actual: 5 calls).
+                .WithMessage(@"Logger has been called few times (Expected: 12 calls, Actual: 7 calls).
 - Message: (Missing log Information)
 - Message: (Missing log Error)
+- IsEnabled(Warning) => return false
 - BeginScope
 - EndScope");
         }
@@ -64,6 +75,8 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var logger = this.CreateLogger();
             logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
                 .LogTrace("Log Trace expected")
                 .LogDebug("Log Debug 2")
                 .LogInformation("Log Information 3")
@@ -82,6 +95,8 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var logger = this.CreateLogger();
             logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug expected")
                 .LogInformation("Log Information 3")
@@ -100,6 +115,8 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var logger = this.CreateLogger();
             logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
                 .LogInformation("Log Information expected")
@@ -118,6 +135,8 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var logger = this.CreateLogger();
             logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
                 .LogInformation("Log Information 3")
@@ -136,6 +155,8 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var logger = this.CreateLogger();
             logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
                 .LogInformation("Log Information 3")
@@ -226,6 +247,8 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var logger = this.CreateLogger();
             logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
                 .LogInformation("Log Information 3")
@@ -245,6 +268,8 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var logger = this.CreateLogger();
             logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
                 .LogWarning("Log Trace 1");
 
             var objectToLog = new ObjectToLog(logger.Object);
@@ -334,6 +359,8 @@ namespace PosInformatique.Logging.Assertions.Tests
         {
             var logger = this.CreateLogger();
             logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
                 .LogTrace("Log Trace 1")
                 .LogDebug("Log Debug 2")
                 .LogInformation("Log Information 3");
@@ -342,7 +369,7 @@ namespace PosInformatique.Logging.Assertions.Tests
 
             objectToLog.Invoking(o => o.Invoke())
                 .Should().ThrowExactly<XunitException>()
-                .WithMessage("The ILogger has been called too many times (Expected: 3 calls)");
+                .WithMessage("The ILogger has been called too many times (Expected: 4 calls)");
         }
 
         [Fact]
@@ -519,13 +546,46 @@ namespace PosInformatique.Logging.Assertions.Tests
         }
 
         [Fact]
-        public void IsEnabled_NotSupported()
+        public void IsEnabled_Failed()
         {
             var logger = this.CreateLogger();
+            logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
+                .LogTrace("Log Trace 1")
+                .LogDebug("Log Debug 2")
+                .LogInformation("Log Information 3")
+                .LogWarning("Log Warning 4")
+                .LogError("Log Error 5")
+                .LogInformation("Not expected");
 
-            logger.Object.Invoking(l => l.IsEnabled(LogLevel.Debug))
-                .Should().ThrowExactly<NotSupportedException>()
-                .WithMessage("The mock of this method is not supported by the 'PosInformatique.Logging.Assertions' library.");
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.Invoke())
+                .Should().ThrowExactly<XunitException>()
+                .WithMessage("The 'IsEnabled(Error)' method has been called but expected other action (Expected: Message)");
+        }
+
+        [Fact]
+        public void IsEnabled_WrongLogLevel()
+        {
+            var logger = this.CreateLogger();
+            logger.SetupSequence()
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(true)
+                .LogTrace("Log Trace 1")
+                .LogDebug("Log Debug 2")
+                .LogInformation("Log Information 3")
+                .LogWarning("Log Warning 4")
+                .LogError("Log Error 5")
+                .IsEnabled(LogLevel.Trace)
+                    .Returns(false);
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.Invoke())
+                .Should().ThrowExactly<XunitException>()
+                .WithMessage("The 'IsEnabled()' has been called with a wrong log level (Expected: Trace, Actual: Error).");
         }
 
         [Fact]
@@ -639,11 +699,13 @@ namespace PosInformatique.Logging.Assertions.Tests
 
             public void Invoke()
             {
+                this.logger.IsEnabled(LogLevel.Trace).Should().BeTrue();
                 this.logger.LogTrace("Log Trace {0}", 1);
                 this.logger.LogDebug("Log Debug {0}", 2);
                 this.logger.LogInformation("Log Information {0}", 3);
                 this.logger.LogWarning("Log Warning {0}", 4);
                 this.logger.LogError("Log Error {0}", 5);
+                this.logger.IsEnabled(LogLevel.Error).Should().BeFalse();
             }
 
             public void InvokeWithException(Exception exception)
