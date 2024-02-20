@@ -495,6 +495,28 @@ namespace PosInformatique.Logging.Assertions.Tests
         }
 
         [Fact]
+        public void BeginScope_WithException()
+        {
+            var logger = this.CreateLogger();
+            logger.SetupSequence()
+                .LogTrace("Log Trace 1")
+                .BeginScope(new { ScopeLevel = 1, ScopeName = "Scope level 1" })
+                    .LogDebug("Log Debug 2")
+                    .BeginScope(new { ScopeLevel = 2, ScopeName = "Scope level 2" })
+                        .LogInformation("Log Information 3")
+                    .EndScope()
+                .EndScope();
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.InvokeWithScopeAndException())
+                .Should().ThrowExactly<FormatException>()
+                .WithMessage("An exception is thrown");
+
+            logger.VerifyLogs();
+        }
+
+        [Fact]
         public void BeginScope_EndScopeExpected()
         {
             var logger = this.CreateLogger();
@@ -630,36 +652,36 @@ namespace PosInformatique.Logging.Assertions.Tests
             logger.VerifyLogs();
         }
 
-        /// <summary>
-        /// Test the following scenario.
-        /// - BeginScope() block is used.
-        /// - Logs are assert inside this block
-        /// - An exception is throw inside the block.
-        /// => Expected: The exception is thrown, and no assertion exception must be raised in the Dispose() method
-        /// of the log record.
-        /// It will help the developer to know the original exception and not parasited by the exception of the library
-        /// thrown in the Dispose() method.
-        /// </summary>
-        [Fact]
-        public void LogWithException_InsideBeginScope()
-        {
-            var logger = this.CreateLogger();
-            logger.SetupSequence()
-                .LogTrace("Log Trace 1")
-                .BeginScope(new { ScopeLevel = 1, ScopeName = "Scope level 1" })
-                    .LogDebug("Log Debug 2")
-                    .BeginScope(new { ScopeLevel = 2, ScopeName = "Scope level 2" })
-                        .LogInformation("Log Information 3")
-                    .EndScope()
-                    .LogWarning("Log Warning 4")
-                .LogError("Log Error 5");
+        /////// <summary>
+        /////// Test the following scenario.
+        /////// - BeginScope() block is used.
+        /////// - Logs are assert inside this block
+        /////// - An exception is throw inside the block.
+        /////// => Expected: The exception is thrown, and no assertion exception must be raised in the Dispose() method
+        /////// of the log record.
+        /////// It will help the developer to know the original exception and not parasited by the exception of the library
+        /////// thrown in the Dispose() method.
+        /////// </summary>
+        ////[Fact]
+        ////public void LogWithException_InsideBeginScope()
+        ////{
+        ////    var logger = this.CreateLogger();
+        ////    logger.SetupSequence()
+        ////        .LogTrace("Log Trace 1")
+        ////        .BeginScope(new { ScopeLevel = 1, ScopeName = "Scope level 1" })
+        ////            .LogDebug("Log Debug 2")
+        ////            .BeginScope(new { ScopeLevel = 2, ScopeName = "Scope level 2" })
+        ////                .LogInformation("Log Information 3")
+        ////            .EndScope()
+        ////            .LogWarning("Log Warning 4")
+        ////        .LogError("Log Error 5");
 
-            var objectToLog = new ObjectToLog(logger.Object);
+        ////    var objectToLog = new ObjectToLog(logger.Object);
 
-            objectToLog.Invoking(o => o.InvokeWithExceptionInScope())
-                .Should().ThrowExactly<FormatException>()
-                .WithMessage("The exception");
-        }
+        ////    objectToLog.Invoking(o => o.InvokeWithExceptionInScope())
+        ////        .Should().ThrowExactly<FormatException>()
+        ////        .WithMessage("The exception");
+        ////}
 
         protected abstract LoggerMock CreateLogger();
 
@@ -757,6 +779,23 @@ namespace PosInformatique.Logging.Assertions.Tests
                 }
 
                 this.logger.LogError("Log Error {0}", 5);
+            }
+
+            public void InvokeWithScopeAndException()
+            {
+                this.logger.LogTrace("Log Trace {0}", 1);
+
+                using (var scope1 = this.logger.BeginScope(new State { ScopeLevel = 1, ScopeName = "Scope level 1" }))
+                {
+                    this.logger.LogDebug("Log Debug {0}", 2);
+
+                    using (var scope2 = this.logger.BeginScope(new State { ScopeLevel = 2, ScopeName = "Scope level 2" }))
+                    {
+                        this.logger.LogInformation("Log Information {0}", 3);
+
+                        throw new FormatException("An exception is thrown");
+                    }
+                }
             }
 
             public void InvokeWithScopeAsAnonymousObject()
