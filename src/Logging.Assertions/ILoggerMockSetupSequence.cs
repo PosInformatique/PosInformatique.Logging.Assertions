@@ -30,6 +30,13 @@ namespace PosInformatique.Logging.Assertions
         ILoggerMockSetupSequence EndScope();
 
         /// <summary>
+        /// Expect the call to the <see cref="ILogger.IsEnabled(LogLevel)"/> method.
+        /// </summary>
+        /// <param name="level">Log level expected.</param>
+        /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
+        ILoggerMockSetupSequenceIsEnabled IsEnabled(LogLevel level);
+
+        /// <summary>
         /// Expect the call to the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> method.
         /// </summary>
         /// <param name="logLevel"><see cref="LogLevel"/> of the <see cref="ILogger.Log{TState}(LogLevel, EventId, TState, Exception?, Func{TState, Exception?, string})"/> call expected.</param>
