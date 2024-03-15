@@ -323,6 +323,27 @@ namespace PosInformatique.Logging.Assertions.Tests
         }
 
         [Fact]
+        public void LogWithMessageTemplate_DelegateAssertion_DifferentMessage()
+        {
+            var logger = this.CreateLogger();
+            logger.SetupSequence()
+                .LogInformation("DIFFERENT MESSAGE {Id}, {Name} and {Object}")
+                    .WithArguments(3, args =>
+                    {
+                        args["Id"].Should().Be(1234);
+                        args["Name"].Should().Be("The name");
+                        args["Object"].Should().BeEquivalentTo(new { Property = "I am object" });
+                    })
+                .LogError("Log error after message template");
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
+                .Should().ThrowExactly<XunitException>()
+                .WithMessage("Wrong log message for the Log(Information) method call. (Expected: 'DIFFERENT MESSAGE {Id}, {Name} and {Object}', Actual: 'Log information with parameters {Id}, {Name} and {Object}')");
+        }
+
+        [Fact]
         public void LogWithMessageTemplate_ParametersAssertion()
         {
             var logger = this.CreateLogger();
@@ -352,6 +373,22 @@ namespace PosInformatique.Logging.Assertions.Tests
             objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
                 .Should().ThrowExactly<XunitException>()
                 .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '9', Actual: '3')");
+        }
+
+        [Fact]
+        public void LogWithMessageTemplate_ParametersAssertion_DifferentMessage()
+        {
+            var logger = this.CreateLogger();
+            logger.SetupSequence()
+                .LogInformation("DIFFERENT MESSAGE {Id}, {Name} and {Object}")
+                    .WithArguments(1234, "The name", new { Property = "I am object" })
+                .LogError("Log error after message template");
+
+            var objectToLog = new ObjectToLog(logger.Object);
+
+            objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
+                .Should().ThrowExactly<XunitException>()
+                .WithMessage("Wrong log message for the Log(Information) method call. (Expected: 'DIFFERENT MESSAGE {Id}, {Name} and {Object}', Actual: 'Log information with parameters {Id}, {Name} and {Object}')");
         }
 
         [Fact]

@@ -10,6 +10,9 @@
     <PackageProjectUrl>https://github.com/PosInformatique/PosInformatique.Logging.Assertions</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>
+      1.5.1
+      - Fix a bug to check the log messages when using message templates assertions.
+
       1.5.0
       - Add the support to mock the ILogger.IsEnabled(LogLevel) method.
 

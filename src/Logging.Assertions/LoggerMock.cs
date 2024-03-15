@@ -255,11 +255,16 @@ namespace PosInformatique.Logging.Assertions
                 {
                     var stateAsList = (IReadOnlyList<KeyValuePair<string, object?>>)state!;
 
-                    var originalMessage = stateAsList.Single(kv => kv.Key == "{OriginalFormat}");
+                    var originalMessage = (string)stateAsList.Single(kv => kv.Key == "{OriginalFormat}").Value!;
+
+                    if (originalMessage != this.message)
+                    {
+                        Services.ThrowException($"Wrong log message for the Log({logLevel}) method call. (Expected: '{this.message}', Actual: '{originalMessage}')");
+                    }
 
                     if (stateAsList.Count - 1 != this.arguments.Count)
                     {
-                        Services.ThrowException($"Incorrect template message argument count for the '{originalMessage.Value}' template message. (Expected: '{this.arguments.Count}', Actual: '{stateAsList.Count - 1}')");
+                        Services.ThrowException($"Incorrect template message argument count for the '{originalMessage}' template message. (Expected: '{this.arguments.Count}', Actual: '{stateAsList.Count - 1}')");
                     }
 
                     var messageArguments = new LogMessageTemplateArguments(
