@@ -23,10 +23,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A62DA28F
 		tests\.editorconfig = tests\.editorconfig
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{7B54C795-CB70-4A3D-846F-90A6732121B8}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{F37BD0D2-6340-49A1-87A3-F5FFB9EE3FC3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{BBCFBA69-80C5-4053-BA6E-B65583CA19D7}"
 	ProjectSection(SolutionItems) = preProject
-		build\azure-pipelines-ci.yaml = build\azure-pipelines-ci.yaml
-		build\azure-pipelines-release.yaml = build\azure-pipelines-release.yaml
+		.github\workflows\github-actions-ci.yaml = .github\workflows\github-actions-ci.yaml
+		.github\workflows\github-actions-release.yml = .github\workflows\github-actions-release.yml
 	EndProjectSection
 EndProject
 Global
@@ -49,7 +51,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A62DA28F-4ECA-428B-B015-98C716DA7DAF} = {6CE746AC-E3B0-4912-89BA-23EA2733830A}
-		{7B54C795-CB70-4A3D-846F-90A6732121B8} = {6CE746AC-E3B0-4912-89BA-23EA2733830A}
+		{F37BD0D2-6340-49A1-87A3-F5FFB9EE3FC3} = {6CE746AC-E3B0-4912-89BA-23EA2733830A}
+		{BBCFBA69-80C5-4053-BA6E-B65583CA19D7} = {F37BD0D2-6340-49A1-87A3-F5FFB9EE3FC3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B3A52E02-62EF-499F-A509-8DF050E26B77}
