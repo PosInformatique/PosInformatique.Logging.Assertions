@@ -270,7 +270,7 @@ logger.SetupSequence()
 ```
 
 > Here we use the FluentAssertions library to check the arguments values of the log message template, but of course you can use your
-favorite assertion framework to check it.
+favorite assertion library to check it.
 
 The second way allows also to check the arguments of the log template message by there index (*it is not what I recommand,
 because if the trainee developper in your team change the name of the arguments name in the log message template, you will not
@@ -476,13 +476,3 @@ Both usage offers the same fluent assertion methods.
 and the version 2.0.0 of the [Microsoft.Extensions.Logging.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions) NuGet package. So this library can be used with
 different .NET architecture projects (.NET Framework, .NET Core, Xamarin,...) and also with old versions of the
 [Microsoft.Extensions.Logging.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions) NuGet package.
-
-- The [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library
-depends of the [FluentAssertions](https://github.com/fluentassertions/fluentassertions) library
-for internal assertions which is more pretty to read in the exceptions message. It is use the version 6.0.0 and of course it is compatible
-with the earlier version of it.
-
-- Also, the [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library
-use the internal [FluentAssertions](https://github.com/fluentassertions/fluentassertions) unit test
-provider engine detection to throw an exception (when an assertion is false) depending of the engine used to execute
-the unit test. For example, `XunitException` if the unit test engine used is `Xunit`.

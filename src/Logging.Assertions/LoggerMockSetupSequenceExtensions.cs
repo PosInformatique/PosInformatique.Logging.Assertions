@@ -7,7 +7,6 @@
 namespace PosInformatique.Logging.Assertions
 {
     using System.Collections.Generic;
-    using FluentAssertions;
     using Microsoft.Extensions.Logging;
 
     /// <summary>
@@ -24,7 +23,7 @@ namespace PosInformatique.Logging.Assertions
         /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
         public static ILoggerMockSetupSequence BeginScope(this ILoggerMockSetupSequence sequence, object state)
         {
-            return sequence.BeginScope<object>(expectedState => state.Should().BeEquivalentTo(expectedState));
+            return sequence.BeginScope<object>(expectedState => AssertionHelper.BeEquivalentTo(ToDictionary(state), ToDictionary(expectedState)));
         }
 
         /// <summary>
@@ -39,17 +38,7 @@ namespace PosInformatique.Logging.Assertions
         /// <returns>The current <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the <see cref="ILogger"/> method calls.</returns>
         public static ILoggerMockSetupSequence BeginScopeAsDictionary(this ILoggerMockSetupSequence sequence, object state)
         {
-            return sequence.BeginScope<IDictionary<string, object>>(expectedState =>
-            {
-                var actualState = new Dictionary<string, object>();
-
-                foreach (var property in state.GetType().GetProperties())
-                {
-                    actualState.Add(property.Name, property.GetValue(state));
-                }
-
-                actualState.Should().BeEquivalentTo(expectedState);
-            });
+            return sequence.BeginScope<IDictionary<string, object>>(expectedState => AssertionHelper.BeEquivalentTo(ToDictionary(state), expectedState));
         }
 
         /// <summary>
@@ -108,7 +97,7 @@ namespace PosInformatique.Logging.Assertions
         /// <returns>An instance of <see cref="ILoggerMockSetupSequence"/> which allows to continue the setup of the method calls.</returns>
         public static ILoggerMockSetupSequenceLog WithException(this ILoggerMockSetupSequenceError sequence, Exception expectedException)
         {
-            return sequence.WithException(actualException => actualException.Should().BeSameAs(expectedException));
+            return sequence.WithException(actualException => AssertionHelper.BeSameAs(actualException, expectedException));
         }
 
         /// <summary>
@@ -123,9 +112,25 @@ namespace PosInformatique.Logging.Assertions
             {
                 for (int i = 0; i < expectedArguments.Length; i++)
                 {
-                    actualArguments[i].Should().Be(expectedArguments[i]);
+                    if (!Equals(actualArguments[i], expectedArguments[i]))
+                    {
+                        throw new LoggingAssertionFailedException(
+                            $"Log message arguments at the index {i} is different.{Environment.NewLine}Expected: {AssertionHelper.ToString(expectedArguments[i])}{Environment.NewLine}Actual: {AssertionHelper.ToString(actualArguments[i])}");
+                    }
                 }
             });
+        }
+
+        private static IDictionary<string, object> ToDictionary(object @object)
+        {
+            var dictionary = new Dictionary<string, object>();
+
+            foreach (var property in @object.GetType().GetProperties())
+            {
+                dictionary.Add(property.Name, property.GetValue(@object));
+            }
+
+            return dictionary;
         }
     }
 }

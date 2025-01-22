@@ -6,7 +6,6 @@
 
 namespace PosInformatique.Logging.Assertions
 {
-    using FluentAssertions;
     using Microsoft.Extensions.Logging;
 
     /// <summary>
