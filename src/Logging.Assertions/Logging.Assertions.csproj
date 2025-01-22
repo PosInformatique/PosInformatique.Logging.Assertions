@@ -10,9 +10,6 @@
     <PackageProjectUrl>https://github.com/PosInformatique/PosInformatique.Logging.Assertions</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>
-      1.6.0
-      - Add the support of FluentAssertions 8.0.0
-      
       1.5.1
       - Fix a bug to check the log messages when using message templates assertions.
 
@@ -60,7 +57,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="8.0.0" />
+    <PackageReference Include="FluentAssertions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.0.0" />
   </ItemGroup>
 

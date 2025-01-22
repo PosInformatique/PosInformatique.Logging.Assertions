@@ -239,7 +239,7 @@ namespace PosInformatique.Logging.Assertions.Tests
 
             objectToLog.Invoking(o => o.InvokeWithException(exception))
                 .Should().ThrowExactly<XunitException>()
-                .WithMessage("Expected actualException to refer to System.DivideByZeroException: Other exception, but found System.FormatException: The exception.");
+                .WithMessage("Expected actualException to refer to System.DivideByZeroException with message \"Other exception\", but found System.FormatException with message \"The exception\".");
         }
 
         [Fact]

@@ -479,10 +479,8 @@ different .NET architecture projects (.NET Framework, .NET Core, Xamarin,...) an
 
 - The [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library
 depends of the [FluentAssertions](https://github.com/fluentassertions/fluentassertions) library
-for internal assertions which is more pretty to read in the exceptions message. It is use the version 8.0.0 and of course it is compatible
+for internal assertions which is more pretty to read in the exceptions message. It is use the version 6.0.0 and of course it is compatible
 with the earlier version of it.
-  The [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library is compatible
-with the the [FluentAssertions](https://github.com/fluentassertions/fluentassertions) library 6.0.0 with the previous 1.5.1 versions.
 
 - Also, the [PosInformatique.Logging.Assertions](https://www.nuget.org/packages/PosInformatique.Logging.Assertions/) library
 use the internal [FluentAssertions](https://github.com/fluentassertions/fluentassertions) unit test
