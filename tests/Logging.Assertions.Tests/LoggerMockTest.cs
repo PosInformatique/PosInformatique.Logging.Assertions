@@ -61,7 +61,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             objectToLog.Invoke();
 
             logger.Invoking(l => l.VerifyLogs())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage(@"Logger has been called few times (Expected: 12 calls, Actual: 7 calls).
 - Message: (Missing log Information)
 - Message: (Missing log Error)
@@ -86,7 +86,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.Invoke())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("Wrong log message for the Log(Trace) method call. (Expected: 'Log Trace expected', Actual: 'Log Trace 1')");
         }
 
@@ -106,7 +106,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.Invoke())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("Wrong log message for the Log(Debug) method call. (Expected: 'Log Debug expected', Actual: 'Log Debug 2')");
         }
 
@@ -126,7 +126,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.Invoke())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("Wrong log message for the Log(Information) method call. (Expected: 'Log Information expected', Actual: 'Log Information 3')");
         }
 
@@ -146,7 +146,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.Invoke())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("Wrong log message for the Log(Warning) method call. (Expected: 'Log Warning expected', Actual: 'Log Warning 4')");
         }
 
@@ -166,7 +166,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.Invoke())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("Wrong log message for the Log(Error) method call. (Expected: 'Log Error expected', Actual: 'Log Error 5')");
         }
 
@@ -238,8 +238,8 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.InvokeWithException(exception))
-                .Should().ThrowExactly<XunitException>()
-                .WithMessage("Expected actualException to refer to System.DivideByZeroException with message \"Other exception\", but found System.FormatException with message \"The exception\".");
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
+                .WithMessage("Expected exception to refer to System.DivideByZeroException with message \"Other exception\", but found System.FormatException with message \"The exception\".");
         }
 
         [Fact]
@@ -259,7 +259,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.Invoke())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("Expected an exception but no exeception has been thrown.");
         }
 
@@ -275,7 +275,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.Invoke())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("Wrong log level for the Log() method call. (Expected: Warning, Actual: Trace)");
         }
 
@@ -318,7 +318,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '100', Actual: '3')");
         }
 
@@ -339,7 +339,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("Wrong log message for the Log(Information) method call. (Expected: 'DIFFERENT MESSAGE {Id}, {Name} and {Object}', Actual: 'Log information with parameters {Id}, {Name} and {Object}')");
         }
 
@@ -371,7 +371,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("Incorrect template message argument count for the 'Log information with parameters {Id}, {Name} and {Object}' template message. (Expected: '9', Actual: '3')");
         }
 
@@ -387,7 +387,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.InvokeWithMessageTemplate())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("Wrong log message for the Log(Information) method call. (Expected: 'DIFFERENT MESSAGE {Id}, {Name} and {Object}', Actual: 'Log information with parameters {Id}, {Name} and {Object}')");
         }
 
@@ -405,7 +405,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.Invoke())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("The ILogger has been called too many times (Expected: 4 calls)");
         }
 
@@ -491,13 +491,13 @@ namespace PosInformatique.Logging.Assertions.Tests
                 .LogTrace("Log Trace 1")
                 .BeginScope<DateTime>(state =>
                 {
-                    throw new XunitException("Must not be called");
+                    throw new LoggingAssertionFailedException("Must not be called");
                 });
 
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.InvokeWithScope())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("The 'BeginScope()' has been called with a wrong state argument type (Expected: DateTime, Actual: State).");
         }
 
@@ -512,7 +512,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.InvokeWithScopeAsAnonymousObject())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .And.Message.StartsWith("Expectation has property state.ScopeLevel that the other object does not have.\r\nExpectation has property state.ScopeName that the other object does not have.");
         }
 
@@ -527,7 +527,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.InvokeWithScope())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("The 'BeginScope()' method has been called but expected other action (Expected: Message)");
         }
 
@@ -570,7 +570,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.InvokeWithScope())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("The 'Dispose()' method has been called but expected other action (Expected: Message)");
         }
 
@@ -585,8 +585,8 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.InvokeWithScopeAsDictionary())
-                .Should().ThrowExactly<XunitException>()
-                .And.Message.StartsWith("Expected actualState to be a dictionary with 2 item(s), but has additional key(s) {\"ExpectedProperty\"}");
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
+                .WithMessage("Expected state to be a dictionary with 2 item(s), but has additional key(s) {\"ExpectedProperty\"}");
         }
 
         [Fact]
@@ -600,8 +600,8 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.InvokeWithScopeAsDictionary())
-                .Should().ThrowExactly<XunitException>()
-                .And.Message.StartsWith("Expected actualState to be a dictionary with 2 item(s), but it misses key(s) {\"ScopeName\"}");
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
+                .WithMessage("Expected state to be a dictionary with 2 item(s), but it misses key(s) {\"ScopeName\"}");
         }
 
         [Fact]
@@ -621,7 +621,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.Invoke())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("The 'IsEnabled(Error)' method has been called but expected other action (Expected: Message)");
         }
 
@@ -643,7 +643,7 @@ namespace PosInformatique.Logging.Assertions.Tests
             var objectToLog = new ObjectToLog(logger.Object);
 
             objectToLog.Invoking(o => o.Invoke())
-                .Should().ThrowExactly<XunitException>()
+                .Should().ThrowExactly<LoggingAssertionFailedException>()
                 .WithMessage("The 'IsEnabled()' has been called with a wrong log level (Expected: Trace, Actual: Error).");
         }
 

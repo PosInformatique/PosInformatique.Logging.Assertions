@@ -7,8 +7,6 @@
 namespace PosInformatique.Logging.Assertions
 {
     using System.Globalization;
-    using FluentAssertions;
-    using FluentAssertions.Common;
     using Microsoft.Extensions.Logging;
 
     /// <summary>
@@ -64,7 +62,7 @@ namespace PosInformatique.Logging.Assertions
                 var missingCalls = this.expectedLogActions.Skip(this.expectedLogActionsIndex).Select(m => "- " + m.ExceptionDisplayMessage);
                 var missingCallsString = string.Join(Environment.NewLine, missingCalls);
 
-                Services.ThrowException($"Logger has been called few times (Expected: {this.expectedLogActions.Count} calls, Actual: {this.expectedLogActionsIndex} calls).{Environment.NewLine}{missingCallsString}");
+                throw new LoggingAssertionFailedException($"Logger has been called few times (Expected: {this.expectedLogActions.Count} calls, Actual: {this.expectedLogActionsIndex} calls).{Environment.NewLine}{missingCallsString}");
             }
         }
 
@@ -177,14 +175,14 @@ namespace PosInformatique.Logging.Assertions
             {
                 if (this.mock.expectedLogActionsIndex >= this.mock.expectedLogActions.Count)
                 {
-                    Services.ThrowException($"The ILogger has been called too many times (Expected: {this.mock.expectedLogActions.Count} calls)");
+                    throw new LoggingAssertionFailedException($"The ILogger has been called too many times (Expected: {this.mock.expectedLogActions.Count} calls)");
                 }
 
                 var expectedLogAction = this.mock.expectedLogActions[this.mock.expectedLogActionsIndex];
 
                 if (expectedLogAction is not TLogAction expectedLogActionTyped)
                 {
-                    Services.ThrowException($"The '{methodCall}' method has been called but expected other action (Expected: {expectedLogAction.Name})");
+                    throw new LoggingAssertionFailedException($"The '{methodCall}' method has been called but expected other action (Expected: {expectedLogAction.Name})");
                     throw new NotImplementedException("Must not be called.");
                 }
 
@@ -248,7 +246,7 @@ namespace PosInformatique.Logging.Assertions
             {
                 if (logLevel != this.logLevel)
                 {
-                    Services.ThrowException($"Wrong log level for the Log() method call. (Expected: {this.logLevel}, Actual: {logLevel})");
+                    throw new LoggingAssertionFailedException($"Wrong log level for the Log() method call. (Expected: {this.logLevel}, Actual: {logLevel})");
                 }
 
                 if (this.arguments != null)
@@ -259,12 +257,12 @@ namespace PosInformatique.Logging.Assertions
 
                     if (originalMessage != this.message)
                     {
-                        Services.ThrowException($"Wrong log message for the Log({logLevel}) method call. (Expected: '{this.message}', Actual: '{originalMessage}')");
+                        throw new LoggingAssertionFailedException($"Wrong log message for the Log({logLevel}) method call. (Expected: '{this.message}', Actual: '{originalMessage}')");
                     }
 
                     if (stateAsList.Count - 1 != this.arguments.Count)
                     {
-                        Services.ThrowException($"Incorrect template message argument count for the '{originalMessage}' template message. (Expected: '{this.arguments.Count}', Actual: '{stateAsList.Count - 1}')");
+                        throw new LoggingAssertionFailedException($"Incorrect template message argument count for the '{originalMessage}' template message. (Expected: '{this.arguments.Count}', Actual: '{stateAsList.Count - 1}')");
                     }
 
                     var messageArguments = new LogMessageTemplateArguments(
@@ -278,7 +276,7 @@ namespace PosInformatique.Logging.Assertions
 
                     if (message != this.message)
                     {
-                        Services.ThrowException($"Wrong log message for the Log({logLevel}) method call. (Expected: '{this.message}', Actual: '{message}')");
+                        throw new LoggingAssertionFailedException($"Wrong log message for the Log({logLevel}) method call. (Expected: '{this.message}', Actual: '{message}')");
                     }
                 }
 
@@ -286,7 +284,7 @@ namespace PosInformatique.Logging.Assertions
                 {
                     if (exception is null)
                     {
-                        Services.ThrowException($"Expected an exception but no exeception has been thrown.");
+                        throw new LoggingAssertionFailedException($"Expected an exception but no exeception has been thrown.");
                     }
                     else
                     {
@@ -327,7 +325,7 @@ namespace PosInformatique.Logging.Assertions
                 }
                 else
                 {
-                    Services.ThrowException($"The 'BeginScope()' has been called with a wrong state argument type (Expected: {typeof(TExpectedState).Name}, Actual: {typeof(TState).Name}).");
+                    throw new LoggingAssertionFailedException($"The 'BeginScope()' has been called with a wrong state argument type (Expected: {typeof(TExpectedState).Name}, Actual: {typeof(TState).Name}).");
                 }
             }
         }
@@ -381,7 +379,7 @@ namespace PosInformatique.Logging.Assertions
             {
                 if (this.expectedLogLevel != logLevel)
                 {
-                    Services.ThrowException($"The 'IsEnabled()' has been called with a wrong log level (Expected: {this.expectedLogLevel}, Actual: {logLevel}).");
+                    throw new LoggingAssertionFailedException($"The 'IsEnabled()' has been called with a wrong log level (Expected: {this.expectedLogLevel}, Actual: {logLevel}).");
                 }
             }
         }
